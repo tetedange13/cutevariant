@@ -3,6 +3,7 @@ import functools
 from cutevariant.core import command as cmd
 from cutevariant.core.querybuilder import build_complete_query
 from cutevariant.core import vql
+from cutevariant.gui.sql_thread import SqlThread
 import cutevariant.commons as cm
 
 from cutevariant.gui import plugin, FIcon
@@ -86,6 +87,8 @@ class VariantModel(QAbstractTableModel):
         # Keep after all initialization
         self.conn = conn
 
+        self.sql_thread = None
+
     @property
     def conn(self):
         """ Return sqlite connection """
@@ -96,6 +99,9 @@ class VariantModel(QAbstractTableModel):
         """ Set sqlite connection """
         self._conn = conn
         self.emit_changed = True
+
+        self.sql_thread = SqlThread(conn)
+        self.sql_thread.finished.connect(self.count_updated)
 
     @property
     def formatter(self):
@@ -235,20 +241,23 @@ class VariantModel(QAbstractTableModel):
         )
 
         #  Load variants
-        self.variants = list(
-            cmd.select_cmd(
-                self.conn,
-                fields=self.fields,
-                source=self.source,
-                filters=self.filters,
-                limit=self.limit,
-                offset=offset,
-                order_desc=self.order_desc,
-                order_by=self.order_by,
-                group_by=self.group_by,
-                having=self.having,
-            )
-        )
+
+        self.variants = list(self.conn.execute(self.debug_sql).fetchall())
+
+        # self.variants = list(
+        #     cmd.select_cmd(
+        #         self.conn,
+        #         fields=self.fields,
+        #         source=self.source,
+        #         filters=self.filters,
+        #         limit=self.limit,
+        #         offset=offset,
+        #         order_desc=self.order_desc,
+        #         order_by=self.order_by,
+        #         group_by=self.group_by,
+        #         having=self.having,
+        #     )
+        # )
 
         # # Keep favorite and remove vrom data
         # self.favorite = [i["favorite"] for i in self.variants]
@@ -263,15 +272,24 @@ class VariantModel(QAbstractTableModel):
             self.changed.emit()
             # Probably need to compute total ==> >Must be async !
             # But sqlite cannot be async ? Does it ?
-            self.total = cmd.count_cmd(
-                self.conn,
+
+            count_function = functools.partial(
+                cmd.count_cmd,
                 fields=self.fields,
                 source=self.source,
                 filters=self.filters,
                 group_by=self.group_by,
-            )["count"]
+            )
+
+            self.sql_thread.exec_function(count_function)
+
+            # self.total = count_function(self.conn)["count"]
 
         self.endResetModel()
+
+    def count_updated(self):
+        self.total = self.sql_thread.results["count"]
+        print(self.total)
 
     def load_from_vql(self, vql):
 
