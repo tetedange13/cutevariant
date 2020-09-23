@@ -66,6 +66,8 @@ class VariantModel(QAbstractTableModel):
 
     changed = Signal()
 
+    loading = Signal(bool)
+
     def __init__(self, conn=None, parent=None):
         super().__init__()
         self.limit = 50
@@ -101,7 +103,7 @@ class VariantModel(QAbstractTableModel):
         self.emit_changed = True
 
         self.sql_thread = SqlThread(conn)
-        self.sql_thread.finished.connect(self.count_updated)
+        self.sql_thread.finished.connect(self.loaded)
 
     @property
     def formatter(self):
@@ -214,21 +216,13 @@ class VariantModel(QAbstractTableModel):
         if self.conn is None:
             return
 
-        self.beginResetModel()
-
+        print("start loading")
         offset = self.page * self.limit
 
-        self.variants.clear()
+        self.loading.emit(True)
 
-        #  Add fields from group by
-
-        for g in self.group_by:
-            if g not in self.fields:
-                self.fields.append(g)
-
-        #  Store SQL query for debugging purpose
-        self.debug_sql = build_complete_query(
-            self.conn,
+        load_func = functools.partial(
+            cmd.select_cmd,
             fields=self.fields,
             source=self.source,
             filters=self.filters,
@@ -239,57 +233,44 @@ class VariantModel(QAbstractTableModel):
             group_by=self.group_by,
             having=self.having,
         )
+        # self.sql_thread.terminate()
+        self.sql_thread.exec_function(load_func)
+
+    def loaded(self):
+
+        self.beginResetModel()
+        self.variants.clear()
+
+        #  Add fields from group by
+        for g in self.group_by:
+            if g not in self.fields:
+                self.fields.append(g)
 
         #  Load variants
-
-        self.variants = list(self.conn.execute(self.debug_sql).fetchall())
-
-        # self.variants = list(
-        #     cmd.select_cmd(
-        #         self.conn,
-        #         fields=self.fields,
-        #         source=self.source,
-        #         filters=self.filters,
-        #         limit=self.limit,
-        #         offset=offset,
-        #         order_desc=self.order_desc,
-        #         order_by=self.order_by,
-        #         group_by=self.group_by,
-        #         having=self.having,
-        #     )
-        # )
-
-        # # Keep favorite and remove vrom data
-        # self.favorite = [i["favorite"] for i in self.variants]
-        # for i in self.variants:
-        #     i.pop("favorite")
+        self.variants = list(self.sql_thread.results)
 
         if self.variants:
             self.headers = list(self.variants[0].keys())
 
-        #  Compute total
-        if emit_changed:
-            self.changed.emit()
-            # Probably need to compute total ==> >Must be async !
-            # But sqlite cannot be async ? Does it ?
+            #  Compute total
+            # if emit_changed:
+            #     self.changed.emit()
+            #     # Probably need to compute total ==> >Must be async !
+            #     # But sqlite cannot be async ? Does it ?
 
-            count_function = functools.partial(
-                cmd.count_cmd,
-                fields=self.fields,
-                source=self.source,
-                filters=self.filters,
-                group_by=self.group_by,
-            )
+        count_function = functools.partial(
+            cmd.count_cmd,
+            fields=self.fields,
+            source=self.source,
+            filters=self.filters,
+            group_by=self.group_by,
+        )
 
-            self.sql_thread.exec_function(count_function)
-
-            # self.total = count_function(self.conn)["count"]
+        self.total = count_function(self.conn)["count"]
 
         self.endResetModel()
 
-    def count_updated(self):
-        self.total = self.sql_thread.results["count"]
-        print(self.total)
+        self.loading.emit(False)
 
     def load_from_vql(self, vql):
 
@@ -464,9 +445,14 @@ class VariantView(QWidget):
         self.page_box.setValidator(QIntValidator())
 
         self.info_label = QLabel()
+        self.loading_label = QLabel()
+        self.loading_label.setMovie(QMovie(cm.DIR_ICONS + "/loading.gif"))
+        self.loading_label.movie().setScaledSize(QSize(20, 20))
+        self.loading_label.movie().start()
 
         self.bottom_bar.addAction(FIcon(0xF0866), "show sql", self.on_show_sql)
         self.bottom_bar.addWidget(self.info_label)
+        self.bottom_bar.addWidget(self.loading_label)
         self.bottom_bar.addWidget(spacer)
         self.bottom_bar.setIconSize(QSize(16, 16))
         self.bottom_bar.setMaximumHeight(30)
@@ -498,6 +484,18 @@ class VariantView(QWidget):
         self.setLayout(main_layout)
 
         # broadcast focus signal
+
+        self.model.loading.connect(self.set_loading)
+
+    def set_loading(self, active=True):
+        # print("Change loading", active)
+        self.loading_label.setVisible(False)
+        self.setDisabled(active)
+
+        if active:
+            self.loading_label.movie().start()
+        else:
+            self.loading_label.movie().stop()
 
     def setModel(self, model: VariantModel):
         self.model = model

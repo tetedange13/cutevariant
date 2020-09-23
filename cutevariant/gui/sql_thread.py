@@ -44,7 +44,7 @@ class SqlThread(QThread):
         self.async_conn.row_factory = sqlite3.Row
 
         if self.function:
-            self.results = self.function(self.async_conn)
+            self.results = list(self.function(self.async_conn))
             return
 
         if self.query:
