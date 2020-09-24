@@ -124,6 +124,11 @@ class VariantModel(QAbstractTableModel):
         """
         return len(self.headers)
 
+    def clear(self):
+        self.beginResetModel()
+        self.variants.clear()
+        self.endResetModel()
+
     def data(self, index: QModelIndex(), role=Qt.DisplayRole):
         """ Overrided: return index data according role.
         This method is called by the Qt view to get data to display according Qt role. 
@@ -211,11 +216,14 @@ class VariantModel(QAbstractTableModel):
         if self.conn is None:
             return
 
-        print("start loading")
-        offset = self.page * self.limit
-
         self.loading.emit(True)
 
+        offset = self.page * self.limit
+
+        # self.clear()  # Assume variant = []
+        self.total = 0
+
+        # Create load_func to run asynchronously
         load_func = functools.partial(
             cmd.select_cmd,
             fields=self.fields,
@@ -228,12 +236,39 @@ class VariantModel(QAbstractTableModel):
             group_by=self.group_by,
             having=self.having,
         )
+
+        # Create count_func to run asynchronously
+        count_function = functools.partial(
+            cmd.count_cmd,
+            fields=self.fields,
+            source=self.source,
+            filters=self.filters,
+            group_by=self.group_by,
+        )
+
         # self.sql_thread.terminate()
-        self.runnable = SqlRunnable(self.conn, load_func)
-        self.runnable.signals.finished.connect(self.loaded)
-        QThreadPool.globalInstance().start(self.runnable)
+        self.variant_runnable = SqlRunnable(
+            self.conn, lambda conn: list(load_func(conn))
+        )
+        self.variant_runnable.signals.finished.connect(self.loaded)
+
+        self.count_runnable = SqlRunnable(self.conn, count_function)
+        self.count_runnable.signals.finished.connect(self.loaded)
+
+        QThreadPool.globalInstance().setMaxThreadCount(1)
+        QThreadPool.globalInstance().start(self.variant_runnable)
+        QThreadPool.globalInstance().start(self.count_runnable)
 
     def loaded(self):
+
+        if not hasattr(self, "variant_runnable") or not hasattr(self, "count_runnable"):
+            self.loading.emit(False)
+            return
+
+        if not self.variant_runnable.done or not self.count_runnable.done:
+            # One of the runner has not finished his job
+            self.loading.emit(False)
+            return
 
         self.beginResetModel()
         self.variants.clear()
@@ -244,26 +279,16 @@ class VariantModel(QAbstractTableModel):
                 self.fields.append(g)
 
         #  Load variants
-        self.variants = list(self.runnable.results)
+        self.variants = self.variant_runnable.results
 
         if self.variants:
             self.headers = list(self.variants[0].keys())
 
-            #  Compute total
-            # if emit_changed:
-            #     self.changed.emit()
-            #     # Probably need to compute total ==> >Must be async !
-            #     # But sqlite cannot be async ? Does it ?
+        # print(self.count_runnable.results["count"])
+        self.total = self.count_runnable.results["count"]
 
-        count_function = functools.partial(
-            cmd.count_cmd,
-            fields=self.fields,
-            source=self.source,
-            filters=self.filters,
-            group_by=self.group_by,
-        )
-
-        self.total = count_function(self.conn)["count"]
+        del self.variant_runnable
+        del self.count_runnable
 
         self.endResetModel()
 
@@ -489,7 +514,6 @@ class VariantView(QWidget):
 
     def load(self):
         self.model.load()
-        self.load_page_box()
 
     def set_formatter(self, formatter):
         self.delegate.formatter = formatter

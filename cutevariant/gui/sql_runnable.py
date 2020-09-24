@@ -25,13 +25,20 @@ class SqlRunnable(QRunnable):
         self.function = function
         self.results = None
         self.signals = SqlRunnable.Signals()
+        self.done = False
 
     def run(self):
         # We are in a new thread ...
+        self.done = False
         if self.function:
             self.signals.started.emit()
             self.async_conn = get_sql_connexion(self.filename)
-            self.results = list(self.function(self.async_conn))
+            self.results = self.function(self.async_conn)
+            self.done = True
+            self.signals.finished.emit()
+
+        else:
+            self.done = True
             self.signals.finished.emit()
 
 
