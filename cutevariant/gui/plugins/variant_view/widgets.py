@@ -11,6 +11,7 @@ from cutevariant.gui import formatter
 from cutevariant.gui.widgets import MarkdownEditor
 
 import math
+import os
 
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
@@ -255,19 +256,16 @@ class VariantModel(QAbstractTableModel):
         self.count_runnable = SqlRunnable(self.conn, count_function)
         self.count_runnable.signals.finished.connect(self.loaded)
 
-        QThreadPool.globalInstance().setMaxThreadCount(1)
         QThreadPool.globalInstance().start(self.variant_runnable)
         QThreadPool.globalInstance().start(self.count_runnable)
 
     def loaded(self):
 
         if not hasattr(self, "variant_runnable") or not hasattr(self, "count_runnable"):
-            self.loading.emit(False)
             return
 
         if not self.variant_runnable.done or not self.count_runnable.done:
             # One of the runner has not finished his job
-            self.loading.emit(False)
             return
 
         self.beginResetModel()
@@ -421,6 +419,39 @@ class VariantDelegate(QStyledItemDelegate):
         self.formatter.paint(painter, option, index)
 
 
+class LoadingTableView(QTableView):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        gif = os.path.join(cm.DIR_ICONS, "loading.gif")
+        self.movie = QMovie(gif)
+
+        self.movie.frameChanged.connect(self.update)
+
+    def paintEvent(self, event: QPainter):
+
+        if self.is_loading():
+            painter = QPainter(self.viewport())
+            rect = self.movie.currentPixmap().rect()
+            rect.moveCenter(self.viewport().rect().center())
+            painter.drawPixmap(rect.x(), rect.y(), self.movie.currentPixmap())
+            self.viewport().update()
+        else:
+            super().paintEvent(event)
+
+    def set_loading(self, active=True):
+
+        if active:
+            self.movie.start()
+        else:
+            self.movie.stop()
+
+        self.viewport().update()
+
+    def is_loading(self):
+        return self.movie.state() == QMovie.Running
+
+
 class VariantView(QWidget):
 
     """A Variant view with controller like pagination
@@ -432,7 +463,7 @@ class VariantView(QWidget):
     def __init__(self, parent=None):
         super().__init__()
 
-        self.view = QTableView()
+        self.view = LoadingTableView()
         self.bottom_bar = QToolBar()
 
         # self.view.setFrameStyle(QFrame.NoFrame)
@@ -506,7 +537,7 @@ class VariantView(QWidget):
 
         # broadcast focus signal
 
-        self.model.loading.connect(self.setDisabled)
+        self.model.loading.connect(self.view.set_loading)
 
     def setModel(self, model: VariantModel):
         self.model = model
@@ -986,20 +1017,27 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    conn = sql.get_sql_connexion(":memory:")
-    reader = VcfReader(
-        open("/home/sacha/Dev/cutevariant/examples/test.snpeff.vcf"), "snpeff"
-    )
-    import_reader(conn, reader)
-
-    w = VariantViewWidget()
-
-    w.conn = conn
-    w.first_pane.model.conn = conn
-    w.first_pane.load()
-    # w.main_view.model.group_by = ["chr","pos","ref","alt"]
-    # w.on_refresh()
+    m = QStringListModel()
+    m.setStringList(["salut", "sach"])
+    w = LoadingTableView()
+    w.setModel(m)
 
     w.show()
+
+    # conn = sql.get_sql_connexion(":memory:")
+    # reader = VcfReader(
+    #     open("/home/sacha/Dev/cutevariant/examples/test.snpeff.vcf"), "snpeff"
+    # )
+    # import_reader(conn, reader)
+
+    # w = VariantViewWidget()
+
+    # w.conn = conn
+    # w.first_pane.model.conn = conn
+    # w.first_pane.load()
+    # # w.main_view.model.group_by = ["chr","pos","ref","alt"]
+    # # w.on_refresh()
+
+    # w.show()
 
     app.exec_()
