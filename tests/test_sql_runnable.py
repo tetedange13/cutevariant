@@ -20,10 +20,11 @@ def conn():
 def test_query(qtbot, conn):
 
     runnable = SqlRunnable(
-        conn, lambda conn: conn.execute("SELECT COUNT(*) FROM variants").fetchone()[1]
+        conn,
+        lambda conn: list(conn.execute("SELECT COUNT(*) FROM variants").fetchone())[0],
     )
 
     with qtbot.waitSignal(runnable.signals.finished, timeout=10000) as blocker:
         QThreadPool.globalInstance().start(runnable)
 
-    print(runnable.results)
+    assert runnable.results == 11
