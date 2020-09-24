@@ -21,10 +21,10 @@ class SqlRunnable(QRunnable):
             function (Callable): Function with conn as argments
         """
         super().__init__()
-        self.filename = self.conn.execute("PRAGMA database_list").fetchone()["file"]
+        self.filename = conn.execute("PRAGMA database_list").fetchone()["file"]
         self.function = function
         self.results = None
-        self.signals = Signals()
+        self.signals = SqlRunnable.Signals()
 
     def run(self):
         # We are in a new thread ...

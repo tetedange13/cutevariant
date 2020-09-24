@@ -3,7 +3,7 @@ import functools
 from cutevariant.core import command as cmd
 from cutevariant.core.querybuilder import build_complete_query
 from cutevariant.core import vql
-from cutevariant.gui.sql_thread import SqlThread
+from cutevariant.gui.sql_runnable import SqlRunnable
 import cutevariant.commons as cm
 
 from cutevariant.gui import plugin, FIcon
@@ -89,8 +89,6 @@ class VariantModel(QAbstractTableModel):
         # Keep after all initialization
         self.conn = conn
 
-        self.sql_thread = None
-
     @property
     def conn(self):
         """ Return sqlite connection """
@@ -101,9 +99,6 @@ class VariantModel(QAbstractTableModel):
         """ Set sqlite connection """
         self._conn = conn
         self.emit_changed = True
-
-        self.sql_thread = SqlThread(conn)
-        self.sql_thread.finished.connect(self.loaded)
 
     @property
     def formatter(self):
@@ -234,7 +229,9 @@ class VariantModel(QAbstractTableModel):
             having=self.having,
         )
         # self.sql_thread.terminate()
-        self.sql_thread.exec_function(load_func)
+        self.runnable = SqlRunnable(self.conn, load_func)
+        self.runnable.signals.finished.connect(self.loaded)
+        QThreadPool.globalInstance().start(self.runnable)
 
     def loaded(self):
 
@@ -247,7 +244,7 @@ class VariantModel(QAbstractTableModel):
                 self.fields.append(g)
 
         #  Load variants
-        self.variants = list(self.sql_thread.results)
+        self.variants = list(self.runnable.results)
 
         if self.variants:
             self.headers = list(self.variants[0].keys())
@@ -452,7 +449,6 @@ class VariantView(QWidget):
 
         self.bottom_bar.addAction(FIcon(0xF0866), "show sql", self.on_show_sql)
         self.bottom_bar.addWidget(self.info_label)
-        self.bottom_bar.addWidget(self.loading_label)
         self.bottom_bar.addWidget(spacer)
         self.bottom_bar.setIconSize(QSize(16, 16))
         self.bottom_bar.setMaximumHeight(30)
@@ -485,17 +481,7 @@ class VariantView(QWidget):
 
         # broadcast focus signal
 
-        self.model.loading.connect(self.set_loading)
-
-    def set_loading(self, active=True):
-        # print("Change loading", active)
-        self.loading_label.setVisible(False)
-        self.setDisabled(active)
-
-        if active:
-            self.loading_label.movie().start()
-        else:
-            self.loading_label.movie().stop()
+        self.model.loading.connect(self.setDisabled)
 
     def setModel(self, model: VariantModel):
         self.model = model
