@@ -91,6 +91,7 @@ class VariantModel(QAbstractTableModel):
         # Keep after all initialization
         self.conn = conn
 
+        self.pool = QThreadPool()
         self.is_loading = False
 
     @property
@@ -232,6 +233,8 @@ class VariantModel(QAbstractTableModel):
         # self.clear()  # Assume variant = []
         self.total = 0
 
+        LOGGER.debug("page:" + str(self.page))
+
         # Create load_func to run asynchronously
         load_func = functools.partial(
             cmd.select_cmd,
@@ -264,8 +267,8 @@ class VariantModel(QAbstractTableModel):
         self.count_runnable = SqlRunnable(self.conn, count_function)
         self.count_runnable.signals.finished.connect(self.loaded)
 
-        QThreadPool.globalInstance().start(self.variant_runnable)
-        QThreadPool.globalInstance().start(self.count_runnable)
+        self.pool.start(self.variant_runnable)
+        self.pool.start(self.count_runnable)
 
     def loaded(self):
 
@@ -548,7 +551,7 @@ class VariantView(QWidget):
         # broadcast focus signal
 
         self.model.loading.connect(self._set_loading)
-        self.model.load_finished.connect(self.load_page_box)
+        self.model.load_finished.connect(self.loaded)
 
     def _set_loading(self, active=True):
         self.setDisabled(active)
@@ -570,7 +573,11 @@ class VariantView(QWidget):
         self.view.setModel(model)
 
     def load(self):
+        self.model.page = 0
         self.model.load()
+
+    def loaded(self):
+        self.load_page_box()
 
     def set_formatter(self, formatter):
         self.delegate.formatter = formatter
@@ -659,6 +666,7 @@ class VariantView(QWidget):
         else:
             # self.page_box.addItems([str(i) for i in range(self.model.pageCount())])
             self.page_box.validator().setRange(0, self.model.pageCount() - 1)
+            self.page_box.setCurrentText(str(self.model.page))
             self.set_pagging_enabled(True)
 
         self.info_label.setText(
@@ -886,6 +894,7 @@ class VariantViewWidget(plugin.PluginWidget):
 
         self.first_pane.model.formatter = next(formatter.find_formatters())()
         self.second_pane.model.formatter = next(formatter.find_formatters())()
+
         self.load()
 
     def _is_grouped(self) -> bool:
