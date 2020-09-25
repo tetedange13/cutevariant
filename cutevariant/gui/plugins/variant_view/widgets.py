@@ -67,7 +67,8 @@ class VariantModel(QAbstractTableModel):
 
     changed = Signal()
 
-    loading = Signal(bool)
+    loading = Signal(bool)  # emit when data start or stop loading
+    load_finished = Signal()  # Emit when data is loaded
 
     def __init__(self, conn=None, parent=None):
         super().__init__()
@@ -89,6 +90,8 @@ class VariantModel(QAbstractTableModel):
         self.debug_sql = None
         # Keep after all initialization
         self.conn = conn
+
+        self.is_loading = False
 
     @property
     def conn(self):
@@ -203,6 +206,10 @@ class VariantModel(QAbstractTableModel):
             self.variants[row].update(variant)
             self.dataChanged.emit(left, right)
 
+    def _set_loading(self, active=True):
+        self.is_loading = active
+        self.loading.emit(active)
+
     def load(self, emit_changed=True, reset_page=False):
         """Load variant data into the model from query attributes
 
@@ -217,7 +224,8 @@ class VariantModel(QAbstractTableModel):
         if self.conn is None:
             return
 
-        self.loading.emit(True)
+        self._set_loading(True)
+        LOGGER.info("Start loading")
 
         offset = self.page * self.limit
 
@@ -268,6 +276,8 @@ class VariantModel(QAbstractTableModel):
             # One of the runner has not finished his job
             return
 
+        LOGGER.info("received load data")
+
         self.beginResetModel()
         self.variants.clear()
 
@@ -290,7 +300,8 @@ class VariantModel(QAbstractTableModel):
 
         self.endResetModel()
 
-        self.loading.emit(False)
+        self._set_loading(False)
+        self.load_finished.emit()
 
     def load_from_vql(self, vql):
 
@@ -439,13 +450,12 @@ class LoadingTableView(QTableView):
         else:
             super().paintEvent(event)
 
-    def set_loading(self, active=True):
+    def start_loading(self):
+        self.movie.start()
+        self.viewport().update()
 
-        if active:
-            self.movie.start()
-        else:
-            self.movie.stop()
-
+    def stop_loading(self):
+        self.movie.stop()
         self.viewport().update()
 
     def is_loading(self):
@@ -537,7 +547,23 @@ class VariantView(QWidget):
 
         # broadcast focus signal
 
-        self.model.loading.connect(self.view.set_loading)
+        self.model.loading.connect(self._set_loading)
+        self.model.load_finished.connect(self.load_page_box)
+
+    def _set_loading(self, active=True):
+        self.setDisabled(active)
+        if active:
+            QTimer.singleShot(1000, self.start_loading_after_delay)
+        else:
+            self.view.stop_loading()
+
+    def start_loading_after_delay(self):
+        self.setDisabled(self.model.is_loading)
+
+        if self.model.is_loading:
+            self.view.start_loading()
+        else:
+            self.view.stop_loading()
 
     def setModel(self, model: VariantModel):
         self.model = model
