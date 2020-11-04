@@ -1,0 +1,25 @@
+cutevariant.core.writer.csvwriter.CsvWriter
+===========================================
+
+.. currentmodule:: cutevariant.core.writer.csvwriter
+
+.. autoclass:: CsvWriter
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CsvWriter.__init__
+      ~CsvWriter.save
+   
+   
+
+   
+   
+   

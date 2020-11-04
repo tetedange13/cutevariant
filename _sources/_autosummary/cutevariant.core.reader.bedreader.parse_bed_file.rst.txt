@@ -1,0 +1,6 @@
+cutevariant.core.reader.bedreader.parse\_bed\_file
+==================================================
+
+.. currentmodule:: cutevariant.core.reader.bedreader
+
+.. autofunction:: parse_bed_file

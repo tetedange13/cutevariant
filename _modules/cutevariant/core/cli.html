@@ -1,0 +1,503 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.cli &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.cli</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.cli</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Standard imports</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="c1"># Custom imports</span>
+<span class="kn">import</span> <span class="nn">progressbar</span>
+<span class="kn">from</span> <span class="nn">columnar</span> <span class="k">import</span> <span class="n">columnar</span>
+<span class="kn">from</span> <span class="nn">cutevariant.core.importer</span> <span class="k">import</span> <span class="n">async_import_file</span>
+<span class="kn">from</span> <span class="nn">cutevariant.core</span> <span class="k">import</span> <span class="n">sql</span><span class="p">,</span> <span class="n">vql</span><span class="p">,</span> <span class="n">command</span>
+<span class="kn">from</span> <span class="nn">cutevariant.core.querybuilder</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">cutevariant.commons</span> <span class="k">import</span> <span class="n">log_level</span>
+
+
+<div class="viewcode-block" id="display_sql_results"><a class="viewcode-back" href="../../../cli.html#cutevariant.core.cli.display_sql_results">[docs]</a><span class="k">def</span> <span class="nf">display_sql_results</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Display SQL results in the console in tabulated format&quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">columnar</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+            <span class="n">no_borders</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="display_query_status"><a class="viewcode-back" href="../../../cli.html#cutevariant.core.cli.display_query_status">[docs]</a><span class="k">def</span> <span class="nf">display_query_status</span><span class="p">(</span><span class="n">query_result</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Display error status of a valid and executed VQL query</span>
+
+<span class="sd">    Supported results of VQL commands: drop/import; create/set/bed</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        query_result(dict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Success for drop/import; id present for create/set/bed</span>
+    <span class="k">if</span> <span class="n">query_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;success&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">query_result</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;An error occured, there is no result, or there is nothing to do.&quot;</span><span class="p">)</span>
+    <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># noinspection PyTypeChecker</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="k">lambda</span> <span class="n">prog</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">(</span><span class="n">prog</span><span class="p">),</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Cutevariant cli mode helps to run actions directly from command-line.</span><span class="se">\n</span><span class="s2"></span>
+<span class="s2">The env variable $CUTEVARIANT_DB can be used to define a database instead of</span>
+<span class="s2">the arguments.&quot;&quot;&quot;</span><span class="p">,</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;Examples:</span>
+
+<span class="s2">    $ cutevariant-cli show --db my_database.db samples</span>
+<span class="s2">    or</span>
+<span class="s2">    $ export CUTEVARIANT_DB=my_database.db</span>
+<span class="s2">    $ cutevariant-cli show samples&quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># Default log level: critical</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-vv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;?&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;error&quot;</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;debug&quot;</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="s2">&quot;critical&quot;</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;warning&quot;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="n">sub_parser</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="s2">&quot;subparser&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Common parser: Database file requirement #################################</span>
+    <span class="n">parent_parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--db&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;SQLite database. By default, $CUTEVARIANT_DB is used.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create DB parser #########################################################</span>
+    <span class="n">createdb_parser</span> <span class="o">=</span> <span class="n">sub_parser</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+        <span class="s2">&quot;createdb&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Build a SQLite database from a vcf file&quot;</span><span class="p">,</span>
+        <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">parent_parser</span><span class="p">],</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;Examples:</span>
+
+<span class="s2">        $ cutevariant-cli createdb -i &quot;examples/test.snpeff.vcf&quot;</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+    <span class="p">)</span>
+    <span class="n">createdb_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;-i&quot;</span><span class="p">,</span> <span class="s2">&quot;--input&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;VCF file path&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Show parser ##############################################################</span>
+    <span class="n">show_parser</span> <span class="o">=</span> <span class="n">sub_parser</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+        <span class="s2">&quot;show&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Display table content&quot;</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">parent_parser</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">show_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;table&quot;</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">,</span> <span class="s2">&quot;selections&quot;</span><span class="p">,</span> <span class="s2">&quot;samples&quot;</span><span class="p">,</span> <span class="s2">&quot;wordsets&quot;</span><span class="p">],</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Possible names of tables.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Remove parser ############################################################</span>
+    <span class="n">remove_parser</span> <span class="o">=</span> <span class="n">sub_parser</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+        <span class="s2">&quot;remove&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;remove selection&quot;</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">parent_parser</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">remove_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;names&quot;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Name(s) of selection(s).&quot;</span><span class="p">)</span>
+
+    <span class="c1"># VQL parser ###############################################################</span>
+    <span class="n">select_parser</span> <span class="o">=</span> <span class="n">sub_parser</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
+        <span class="s2">&quot;exec&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Execute a VQL statement.&quot;</span><span class="p">,</span>
+        <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="n">parent_parser</span><span class="p">],</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;Examples:</span>
+
+<span class="s2">    $ cutevariant-cli exec &quot;SELECT favorite,chr,pos,ref,alt FROM variants&quot;</span>
+<span class="s2">    or</span>
+<span class="s2">    $ cutevariant-cli exec &quot;SELECT chr,ref,alt FROM variants&quot; -s myselection</span>
+<span class="s2">    or</span>
+<span class="s2">    $ cutevariant-cli exec &quot;IMPORT WORDSETs &#39;examples/gene.txt&#39; AS mygenes&quot;</span>
+<span class="s2">    or</span>
+<span class="s2">    $ cutevariant-cli exec &quot;DROP WORDSETS mygenes&quot;</span>
+<span class="s2">    or</span>
+<span class="s2">    $ cutevariant-cli exec &quot;CREATE myselection1 FROM variants WHERE gene = &#39;CHID1&#39;&quot;</span>
+<span class="s2">    $ cutevariant-cli exec &quot;CREATE myselection2 FROM variants WHERE gene = &#39;CICP23&#39;&quot;</span>
+<span class="s2">    $ cutevariant-cli exec &quot;CREATE myselection3 = myselection2 | myselection2&quot;</span>
+<span class="s2">    or</span>
+<span class="s2">    $ cutevariant-cli exec &quot;CREATE boby FROM variants INTERSECT &#39;examples/test.bed&#39;&quot;</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">select_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;vql&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A VQL statement.&quot;</span><span class="p">)</span>
+    <span class="n">select_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-l&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--limit&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Limit the number of lines in output.&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># select_parser.add_argument(</span>
+    <span class="c1">#     &quot;-g&quot;,</span>
+    <span class="c1">#     &quot;--group&quot;,</span>
+    <span class="c1">#     action=&quot;store_true&quot;,</span>
+    <span class="c1">#     help=&quot;Group SELECT query by...(chr,pos,ref,alt).&quot;,</span>
+    <span class="c1"># )</span>
+    <span class="n">select_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="s2">&quot;--to-selection&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Save SELECT query into a selection name.&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Set parser ###############################################################</span>
+    <span class="c1"># set_parser = sub_parser.add_parser(&quot;set&quot;, help=&quot;Set variable&quot;, parents=[parent_parser])</span>
+
+    <span class="c1"># Workaround for sphinx-argparse module that require the object parser</span>
+    <span class="c1"># before the call of parse_args()</span>
+    <span class="k">if</span> <span class="s2">&quot;html&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parser</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Set log level</span>
+    <span class="c1"># _logger.setLevel(logging.DEBUG)</span>
+    <span class="n">log_level</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="c1"># Create DB parser #########################################################</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">subparser</span> <span class="o">==</span> <span class="s2">&quot;createdb&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">db</span><span class="p">:</span>
+            <span class="c1"># Database file is not set:</span>
+            <span class="c1"># The output file will be based on the name of the VCF one</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">input</span> <span class="o">+</span> <span class="s2">&quot;.db&quot;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">db</span><span class="p">):</span>
+            <span class="c1"># Remove existing file</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
+
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_sql_connection</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">conn</span><span class="p">:</span>
+            <span class="c1"># TODO: bug ... max is not 100...</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">progressbar</span><span class="o">.</span><span class="n">progressbar</span><span class="p">(</span>
+                <span class="n">async_import_file</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">),</span> <span class="n">redirect_stdout</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The database is successfully created!&quot;</span><span class="p">)</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+    <span class="c1"># Prepare SQL connection on DB file</span>
+    <span class="k">if</span> <span class="s2">&quot;CUTEVARIANT_DB&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">subparser</span> <span class="o">!=</span> <span class="s2">&quot;createdb&quot;</span><span class="p">:</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;CUTEVARIANT_DB&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">db</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You must specify a database file via $CUTEVARIANT_DB or --db argument&quot;</span><span class="p">)</span>
+        <span class="n">exit</span><span class="p">()</span>
+
+    <span class="c1"># Init SQL connection</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_sql_connection</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">db</span><span class="p">)</span>
+
+    <span class="c1"># Show parser ##############################################################</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">subparser</span> <span class="o">==</span> <span class="s2">&quot;show&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">table</span> <span class="o">==</span> <span class="s2">&quot;fields&quot;</span><span class="p">:</span>
+            <span class="n">display_sql_results</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_fields</span><span class="p">(</span><span class="n">conn</span><span class="p">)),</span>
+                <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">table</span> <span class="o">==</span> <span class="s2">&quot;samples&quot;</span><span class="p">:</span>
+            <span class="n">display_sql_results</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">conn</span><span class="p">)),</span>
+                <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">table</span> <span class="o">==</span> <span class="s2">&quot;selections&quot;</span><span class="p">:</span>
+            <span class="n">display_sql_results</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_selections</span><span class="p">(</span><span class="n">conn</span><span class="p">)),</span>
+                <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;variant_count&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">table</span> <span class="o">==</span> <span class="s2">&quot;wordsets&quot;</span><span class="p">:</span>
+            <span class="n">display_sql_results</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_wordsets</span><span class="p">(</span><span class="n">conn</span><span class="p">)),</span>
+                <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;word_count&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Remove parser ############################################################</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">subparser</span> <span class="o">==</span> <span class="s2">&quot;remove&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="n">sql</span><span class="o">.</span><span class="n">delete_selection_by_name</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># VQL parser ###############################################################</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">subparser</span> <span class="o">==</span> <span class="s2">&quot;exec&quot;</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">vql</span><span class="p">)</span>
+        <span class="n">vql_command</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Test the VQL query</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="n">vql</span><span class="o">.</span><span class="n">parse_one_vql</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">vql</span><span class="o">.</span><span class="n">textx</span><span class="o">.</span><span class="n">TextXSyntaxError</span><span class="p">,</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Available attributes: e.message, e.line, e.col</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">, col: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">col</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;For query:&quot;</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Select command with redirection to selection</span>
+        <span class="k">if</span> <span class="n">cmd</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;select_cmd&quot;</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">to_selection</span><span class="p">:</span>
+            <span class="n">vql_command</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+                <span class="n">command</span><span class="o">.</span><span class="n">create_cmd</span><span class="p">,</span>
+                <span class="n">conn</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">to_selection</span><span class="p">,</span>
+                <span class="n">source</span><span class="o">=</span><span class="n">cmd</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">],</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">cmd</span><span class="p">[</span><span class="s2">&quot;filters&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Is it redundant with check_vql ?</span>
+            <span class="c1"># No because we also execute SQL statement here</span>
+            <span class="k">if</span> <span class="n">vql_command</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">vql_command</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">create_command_from_obj</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">cmd</span><span class="p">)()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="c1"># For drop_cmd, import_cmd,</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">DatabaseError</span><span class="p">,</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;SQL result: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">ret</span><span class="p">)</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VQL command: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">])</span>
+        <span class="c1"># Note: show_cmd is supported in a separated command option</span>
+
+        <span class="c1"># Select command</span>
+        <span class="k">if</span> <span class="n">cmd</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;select_cmd&quot;</span><span class="p">,)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">to_selection</span><span class="p">:</span>
+            <span class="n">display_sql_results</span><span class="p">((</span><span class="n">i</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">cmd</span><span class="p">[</span><span class="s2">&quot;fields&quot;</span><span class="p">])</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cmd</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;drop_cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;import_cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;create_cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;set_cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;bed_cmd&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">to_selection</span><span class="p">:</span>
+            <span class="c1"># PS: to_selection is used to detect select_cmd with selection creation</span>
+            <span class="n">display_query_status</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

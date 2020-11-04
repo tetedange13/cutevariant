@@ -1,0 +1,25 @@
+cutevariant.core.reader.bedreader.BedReader
+===========================================
+
+.. currentmodule:: cutevariant.core.reader.bedreader
+
+.. autoclass:: BedReader
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BedReader.__init__
+      ~BedReader.get_intervals
+   
+   
+
+   
+   
+   

@@ -1,0 +1,6 @@
+cutevariant.core.reader.abstractreader.check\_field\_schema
+===========================================================
+
+.. currentmodule:: cutevariant.core.reader.abstractreader
+
+.. autofunction:: check_field_schema

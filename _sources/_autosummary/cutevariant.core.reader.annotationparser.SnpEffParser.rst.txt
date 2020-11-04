@@ -1,0 +1,28 @@
+cutevariant.core.reader.annotationparser.SnpEffParser
+=====================================================
+
+.. currentmodule:: cutevariant.core.reader.annotationparser
+
+.. autoclass:: SnpEffParser
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SnpEffParser.__init__
+      ~SnpEffParser.handle_annotations
+      ~SnpEffParser.handle_descriptions
+      ~SnpEffParser.parse_fields
+      ~SnpEffParser.parse_variants
+   
+   
+
+   
+   
+   

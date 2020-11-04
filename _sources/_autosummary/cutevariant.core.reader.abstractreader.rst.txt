@@ -1,0 +1,40 @@
+cutevariant.core.reader.abstractreader
+======================================
+
+.. automodule:: cutevariant.core.reader.abstractreader
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      check_field_schema
+      check_variant_schema
+      sanitize_field_name
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      AbstractReader
+   
+   
+
+   
+   
+   
+
+
+

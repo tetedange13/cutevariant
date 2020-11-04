@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.writer.abstractwriter.AbstractWriter &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../index.html"/>
+        <link rel="up" title="cutevariant.core.writer.abstractwriter" href="cutevariant.core.writer.abstractwriter.html"/>
+        <link rel="next" title="cutevariant.core.writer.csvwriter" href="cutevariant.core.writer.csvwriter.html"/>
+        <link rel="prev" title="cutevariant.core.writer.abstractwriter" href="cutevariant.core.writer.abstractwriter.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev_documentation.html">Documentation for developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../core_api.html">Core API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html">Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html#module-cutevariant.core.vql">VQL language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importers.html">Project importer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../readers.html">Readers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../writers.html">Writers</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cutevariant.core.writer.html">cutevariant.core.writer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev_documentation.html">Documentation for developers</a> &raquo;</li>
+        
+          <li><a href="../core_api.html">Core API</a> &raquo;</li>
+        
+          <li><a href="../writers.html">Writers</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.writer.html">cutevariant.core.writer</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.writer.abstractwriter.html">cutevariant.core.writer.abstractwriter</a> &raquo;</li>
+        
+      <li>cutevariant.core.writer.abstractwriter.AbstractWriter</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/cutevariant.core.writer.abstractwriter.AbstractWriter.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cutevariant-core-writer-abstractwriter-abstractwriter">
+<h1>cutevariant.core.writer.abstractwriter.AbstractWriter<a class="headerlink" href="#cutevariant-core-writer-abstractwriter-abstractwriter" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="cutevariant.core.writer.abstractwriter.AbstractWriter">
+<em class="property">class </em><code class="sig-prename descclassname">cutevariant.core.writer.abstractwriter.</code><code class="sig-name descname">AbstractWriter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/writer/abstractwriter.html#AbstractWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.writer.abstractwriter.AbstractWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for all Writer required to export variants into a file or a database.</p>
+<p>Subclass it if you want a new file writer.</p>
+<dl class="py attribute">
+<dt id="cutevariant.core.writer.abstractwriter.AbstractWriter.device">
+<code class="sig-name descname">device</code><a class="headerlink" href="#cutevariant.core.writer.abstractwriter.AbstractWriter.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>a file object typically returned by open(“w”)</p>
+</dd></dl>
+
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s2">&quot;rw&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">writer</span> <span class="o">=</span> <span class="n">MyWriter</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="gp">... </span>   <span class="n">writer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="cutevariant.core.writer.abstractwriter.AbstractWriter.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/writer/abstractwriter.html#AbstractWriter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.writer.abstractwriter.AbstractWriter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.writer.abstractwriter.AbstractWriter.__init__" title="cutevariant.core.writer.abstractwriter.AbstractWriter.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(device)</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.writer.abstractwriter.AbstractWriter.save" title="cutevariant.core.writer.abstractwriter.AbstractWriter.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(conn, *args, **kwargs)</p></td>
+<td><p>Dump data to a file</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="cutevariant.core.writer.abstractwriter.AbstractWriter.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">conn</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="reference internal" href="../_modules/cutevariant/core/writer/abstractwriter.html#AbstractWriter.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.writer.abstractwriter.AbstractWriter.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump data to a file</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cutevariant.core.writer.csvwriter.html" class="btn btn-neutral float-right" title="cutevariant.core.writer.csvwriter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cutevariant.core.writer.abstractwriter.html" class="btn btn-neutral" title="cutevariant.core.writer.abstractwriter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

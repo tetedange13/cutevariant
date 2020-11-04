@@ -1,0 +1,551 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.abstractreader.AbstractReader &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../index.html"/>
+        <link rel="up" title="cutevariant.core.reader.abstractreader" href="cutevariant.core.reader.abstractreader.html"/>
+        <link rel="next" title="cutevariant.core.reader.annotationparser" href="cutevariant.core.reader.annotationparser.html"/>
+        <link rel="prev" title="cutevariant.core.reader.abstractreader.sanitize_field_name" href="cutevariant.core.reader.abstractreader.sanitize_field_name.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev_documentation.html">Documentation for developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../core_api.html">Core API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html">Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html#module-cutevariant.core.vql">VQL language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importers.html">Project importer</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../readers.html">Readers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../readers.html#module-cutevariant.core.readerfactory">Factory</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../readers.html#id1">Readers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../writers.html">Writers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev_documentation.html">Documentation for developers</a> &raquo;</li>
+        
+          <li><a href="../core_api.html">Core API</a> &raquo;</li>
+        
+          <li><a href="../readers.html">Readers</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.html">cutevariant.core.reader</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.abstractreader.html">cutevariant.core.reader.abstractreader</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.abstractreader.AbstractReader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/cutevariant.core.reader.abstractreader.AbstractReader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cutevariant-core-reader-abstractreader-abstractreader">
+<h1>cutevariant.core.reader.abstractreader.AbstractReader<a class="headerlink" href="#cutevariant-core-reader-abstractreader-abstractreader" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader">
+<em class="property">class </em><code class="sig-prename descclassname">cutevariant.core.reader.abstractreader.</code><code class="sig-name descname">AbstractReader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Base class for all Readers required to import variants into the database.</p>
+<p>Subclass it if you want a new file parser .</p>
+<dl class="py attribute">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.device">
+<code class="sig-name descname">device</code><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.device" title="Permalink to this definition">¶</a></dt>
+<dd><p>A file object typically returned by open(); Can be None if
+FakeReader type is instanciated.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.file_size">
+<code class="sig-name descname">file_size</code><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.file_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>File size in bytes
+See Also: <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.get_total_file_size()</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.number_lines">
+<code class="sig-name descname">number_lines</code><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.number_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of lines in the file (compressed or not).
+See Also: <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.compute_number_lines()</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.read_bytes">
+<code class="sig-name descname">read_bytes</code><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.read_bytes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Current bytes readed (progression = read_bytes / file_size)
+It’s a fallback if number_lines can’t be computed.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.samples">
+<code class="sig-name descname">samples</code><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of samples in the file (default: empty)</p>
+</dd></dl>
+
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+<span class="gp">... </span>   <span class="n">reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<span class="gp">... </span>   <span class="n">reader</span><span class="o">.</span><span class="n">get_variants</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.__init__" title="cutevariant.core.reader.abstractreader.AbstractReader.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(device)</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.compute_number_lines" title="cutevariant.core.reader.abstractreader.AbstractReader.compute_number_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_number_lines</span></code></a>()</p></td>
+<td><p>Get a sample of lines in file if possible and if the end of file is not reached compute an evaluation of the global number of lines.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields" title="cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_fields</span></code></a>()</p></td>
+<td><p>Yield fields with extra mandatory fields like ‘comment’ and ‘score’</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields_by_category" title="cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields_by_category"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_fields_by_category</span></code></a>(category)</p></td>
+<td><p>Syntaxic suggar to get fields according their category</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_extra_variants" title="cutevariant.core.reader.abstractreader.AbstractReader.get_extra_variants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_variants</span></code></a>(**kwargs)</p></td>
+<td><p>Yield variants with extra information computed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_fields" title="cutevariant.core.reader.abstractreader.AbstractReader.get_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fields</span></code></a>()</p></td>
+<td><p>Abstract method hat must return fields description</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_fields_by_category" title="cutevariant.core.reader.abstractreader.AbstractReader.get_fields_by_category"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fields_by_category</span></code></a>(category)</p></td>
+<td><p>Syntaxic suggar to get fields according their category</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_metadatas" title="cutevariant.core.reader.abstractreader.AbstractReader.get_metadatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadatas</span></code></a>()</p></td>
+<td><p>Get meta data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_samples" title="cutevariant.core.reader.abstractreader.AbstractReader.get_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_samples</span></code></a>()</p></td>
+<td><p>Return list of samples</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_total_file_size" title="cutevariant.core.reader.abstractreader.AbstractReader.get_total_file_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_total_file_size</span></code></a>()</p></td>
+<td><p>Compute file size int bytes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_variants" title="cutevariant.core.reader.abstractreader.AbstractReader.get_variants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_variants</span></code></a>()</p></td>
+<td><p>Abstract method must return variants as an iterable of dictionnaries.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_variants_count" title="cutevariant.core.reader.abstractreader.AbstractReader.get_variants_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_variants_count</span></code></a>()</p></td>
+<td><p>Get variant count from the device</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.compute_number_lines">
+<code class="sig-name descname">compute_number_lines</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.compute_number_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.compute_number_lines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a sample of lines in file if possible and if the end of file is
+not reached compute an evaluation of the global number of lines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Nothing but sets <cite>self.number_lines</cite> attribute.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields">
+<code class="sig-name descname">get_extra_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_extra_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield fields with extra mandatory fields like ‘comment’ and ‘score’</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields_by_category">
+<code class="sig-name descname">get_extra_fields_by_category</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">category</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_extra_fields_by_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_extra_fields_by_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntaxic suggar to get fields according their category</p>
+<p>:param category can be usually variants, samples, annotations
+:return: A generator of fields
+:rtype: &lt;generator&gt;</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_extra_variants">
+<code class="sig-name descname">get_extra_variants</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_extra_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_extra_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield variants with extra information computed.</p>
+<p>The following information are added. See get_extra_fields</p>
+<ul class="simple">
+<li><p>favorite (bool): (Default: False)</p></li>
+<li><p>comment (str): (Default: “”)</p></li>
+<li><p>classification (int): ACMG score (Default: 3 (uncertain significance)</p></li>
+<li><p>count_var (int): Number of variants (not 0/0)</p></li>
+<li><p>count_hom (int): How many variants are mutant homozygous within samples</p></li>
+<li><p>count_het (int): How many variants are heterozygous within samples</p></li>
+<li><p>count_ref (int): How many variants are wild homozygous with samples</p></li>
+<li><p>is_indel (bool): Is the variation an insertion / deletion</p></li>
+<li><p>is_snp (bool): Is the variation an single nucleotide variation</p></li>
+</ul>
+<p>If case/control are available from a pedfile, counting from case and
+control is also computed.
+In this case, it is necessary to give sample names in “case” and
+“control” keys in kwargs .</p>
+<p>Example of supported kwargs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;boby&quot;</span><span class="p">,</span> <span class="s2">&quot;raymond&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;control&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lucas&quot;</span><span class="p">,</span> <span class="s2">&quot;pierre&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>case_count_hom (int): How many variants are mutant homozygous within case samples</p></li>
+<li><p>case_count_het (int): How many variants are heterozygous within case samples</p></li>
+<li><p>case_count_ref (int): How many variants are wild heterozygous within case samples</p></li>
+<li><p>control_count_hom (int): How many variants are mutant homozygous within control samples</p></li>
+<li><p>control_count_het (int): How many variants are heterozygous within control samples</p></li>
+<li><p>control_count_ref (int): How many variants are wild heterozygous within control samples</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><cite>cutevariant.core.reader.vcfreader.VcfReader.parse_variants</cite></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>optional</em>) – case and control sample names</p>
+</dd>
+<dt class="field-even">Yields</dt>
+<dd class="field-even"><p><em>(generator[dict])</em> – variants. See also: <a class="reference internal" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_variants" title="cutevariant.core.reader.abstractreader.AbstractReader.get_variants"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_variants()</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><strong>AssertionError</strong> – If sample(s) are both in cases and controls.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_fields">
+<em class="property">abstract classmethod </em><code class="sig-name descname">get_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract method hat must return fields description</p>
+<p>Full output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variant&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
+<span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variant&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
+<span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variant&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
+<span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;alt&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variant&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
+<span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;field_n&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variant&quot;</span><span class="p">,</span> <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
+<span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span> <span class="s2">&quot;samples&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">},</span>
+<span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;genotype&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span> <span class="s2">&quot;samples&quot;</span><span class="p">:</span> <span class="s2">&quot;...&quot;</span><span class="p">}</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Yields</dt>
+<dd class="field-odd"><p><em>dict</em> – field dictionnary</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">get_fields</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_fields_by_category">
+<code class="sig-name descname">get_fields_by_category</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">category</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_fields_by_category"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_fields_by_category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Syntaxic suggar to get fields according their category</p>
+<p>:param category can be usually variants, samples, annotations
+:return: A generator of fields
+:rtype: &lt;generator&gt;</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_metadatas">
+<code class="sig-name descname">get_metadatas</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_metadatas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_metadatas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get meta data</p>
+<p>Override this method to have meta data in sqlite database</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_samples">
+<code class="sig-name descname">get_samples</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; list<a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_samples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of samples</p>
+<p>Override this method to have samples in sqlite database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_total_file_size">
+<code class="sig-name descname">get_total_file_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_total_file_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_total_file_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute file size int bytes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_variants">
+<em class="property">abstract classmethod </em><code class="sig-name descname">get_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract method must return variants as an iterable of dictionnaries.</p>
+<p>Variant dictionnary has 4 mandatory fields <cite>chr</cite>, <cite>pos</cite>, <cite>ref</cite>, <cite>alt</cite>.
+Other fields are optionnal
+For instance:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;chr&quot;</span><span class="p">:</span> <span class="s2">&quot;chr3&quot;</span><span class="p">,</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="mi">3244</span><span class="p">,</span><span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;alt&quot;</span><span class="p">:</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="s2">&quot;qual&quot;</span><span class="p">:</span> <span class="mi">30</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;chr&quot;</span><span class="p">:</span> <span class="s2">&quot;chr4&quot;</span><span class="p">,</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="mi">3244</span><span class="p">,</span><span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;alt&quot;</span><span class="p">:</span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="s2">&quot;qual&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;chr&quot;</span><span class="p">:</span> <span class="s2">&quot;chr5&quot;</span><span class="p">,</span><span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="mi">3244</span><span class="p">,</span><span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;alt&quot;</span><span class="p">:</span><span class="s2">&quot;C&quot;</span><span class="p">,</span><span class="s2">&quot;qual&quot;</span><span class="p">:</span> <span class="mi">10</span> <span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Annotations and Samples objects can be embbeded into a variant dictionnaries.
+Annotations describes several annotations for one variant.
+In the most of the case, those are relative to transcripts.
+Samples describes information relative to a variant with a sample,
+like genotype (gt). This is a mandatory field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span>
+    <span class="s2">&quot;chr&quot;</span><span class="p">:</span> <span class="s2">&quot;chr3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pos&quot;</span><span class="p">:</span> <span class="mi">3244</span><span class="p">,</span>
+    <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;alt&quot;</span><span class="p">:</span><span class="s2">&quot;C&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;field_n&quot;</span><span class="p">:</span> <span class="s2">&quot;value_n&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;gene&quot;</span><span class="p">:</span> <span class="s2">&quot;GJB2&quot;</span><span class="p">,</span> <span class="s2">&quot;transcripts&quot;</span><span class="p">:</span> <span class="s2">&quot;NM_00232.1&quot;</span><span class="p">,</span> <span class="s2">&quot;field_n&quot;</span><span class="p">:</span> <span class="s2">&quot;value_n&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;gene&quot;</span><span class="p">:</span> <span class="s2">&quot;GJB2&quot;</span><span class="p">,</span> <span class="s2">&quot;transcripts&quot;</span><span class="p">:</span> <span class="s2">&quot;NM_00232.2&quot;</span><span class="p">,</span> <span class="s2">&quot;field_n&quot;</span><span class="p">:</span> <span class="s2">&quot;value_n&quot;</span><span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;samples&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;boby&quot;</span><span class="p">,</span> <span class="s2">&quot;genotype&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;field_n&quot;</span><span class="p">:</span><span class="s2">&quot;value_n&quot;</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;kevin&quot;</span><span class="p">,</span> <span class="s2">&quot;genotype&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;field_n&quot;</span><span class="p">:</span><span class="s2">&quot;value_n&quot;</span><span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">},]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Yields</dt>
+<dd class="field-odd"><p><em>dict</em> – variant dictionnary</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">get_variants</span><span class="p">():</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">variant</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">],</span> <span class="n">variant</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.abstractreader.AbstractReader.get_variants_count">
+<code class="sig-name descname">get_variants_count</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="reference internal" href="../_modules/cutevariant/core/reader/abstractreader.html#AbstractReader.get_variants_count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.abstractreader.AbstractReader.get_variants_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get variant count from the device</p>
+<p>Override this method to make it faster</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cutevariant.core.reader.annotationparser.html" class="btn btn-neutral float-right" title="cutevariant.core.reader.annotationparser" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cutevariant.core.reader.abstractreader.sanitize_field_name.html" class="btn btn-neutral" title="cutevariant.core.reader.abstractreader.sanitize_field_name" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+cutevariant.core.reader.abstractreader.AbstractReader
+=====================================================
+
+.. currentmodule:: cutevariant.core.reader.abstractreader
+
+.. autoclass:: AbstractReader
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~AbstractReader.__init__
+      ~AbstractReader.compute_number_lines
+      ~AbstractReader.get_extra_fields
+      ~AbstractReader.get_extra_fields_by_category
+      ~AbstractReader.get_extra_variants
+      ~AbstractReader.get_fields
+      ~AbstractReader.get_fields_by_category
+      ~AbstractReader.get_metadatas
+      ~AbstractReader.get_samples
+      ~AbstractReader.get_total_file_size
+      ~AbstractReader.get_variants
+      ~AbstractReader.get_variants_count
+   
+   
+
+   
+   
+   

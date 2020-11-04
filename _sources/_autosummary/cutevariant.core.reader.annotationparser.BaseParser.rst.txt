@@ -1,0 +1,26 @@
+cutevariant.core.reader.annotationparser.BaseParser
+===================================================
+
+.. currentmodule:: cutevariant.core.reader.annotationparser
+
+.. autoclass:: BaseParser
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BaseParser.__init__
+      ~BaseParser.handle_annotations
+      ~BaseParser.handle_descriptions
+   
+   
+
+   
+   
+   

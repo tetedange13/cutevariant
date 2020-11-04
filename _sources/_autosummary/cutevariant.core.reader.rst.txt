@@ -1,0 +1,38 @@
+﻿cutevariant.core.reader
+=======================
+
+.. automodule:: cutevariant.core.reader
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom_module.rst
+   :recursive:
+
+   cutevariant.core.reader.abstractreader
+   cutevariant.core.reader.annotationparser
+   cutevariant.core.reader.bedreader
+   cutevariant.core.reader.csvreader
+   cutevariant.core.reader.fakereader
+   cutevariant.core.reader.pedreader
+   cutevariant.core.reader.vcfreader
+

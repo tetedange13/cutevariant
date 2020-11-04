@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.vql &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.vql</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.vql</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Proof of concept for the VQL DSL.</span>
+
+<span class="sd">From this module, you only need to use parse_vql or parse_one_vql.</span>
+<span class="sd">For instance::</span>
+
+<span class="sd">    cmd = parse_one_vql(&quot;SELECT chr, pos FROM variants&quot;)</span>
+<span class="sd">    print(cmd)</span>
+
+<span class="sd">See test_vql.py for usage and features.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">textx</span>
+<span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="k">import</span> <span class="n">resource_string</span>
+
+
+<div class="viewcode-block" id="model_class"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.vql.model_class">[docs]</a><span class="k">def</span> <span class="nf">model_class</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass to automatically build the __init__ to get the properties,</span>
+<span class="sd">    and register the class for metamodel</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;__init__&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;__init__&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="fm">__init__</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+    <span class="n">model_class</span><span class="o">.</span><span class="n">classes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span></div>
+
+
+<span class="n">model_class</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="VQLSyntaxError"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.vql.VQLSyntaxError">[docs]</a><span class="k">class</span> <span class="nc">VQLSyntaxError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">=</span> <span class="n">col</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">col</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;VQLSyntaxError: &#39;</span><span class="si">%s</span><span class="s2">&#39; at position </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">col</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;VQLSyntaxError: &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span></div>
+
+
+<span class="c1"># ============ Error handle ==================================</span>
+<div class="viewcode-block" id="error_message_from_err"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.vql.error_message_from_err">[docs]</a><span class="k">def</span> <span class="nf">error_message_from_err</span><span class="p">(</span>
+    <span class="n">err</span><span class="p">:</span> <span class="n">textx</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">TextXSyntaxError</span><span class="p">,</span> <span class="n">raw_vql</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return human-readable information and index in raw_sql query</span>
+<span class="sd">    about the given exception&quot;&quot;&quot;</span>
+    <span class="c1"># print(err)</span>
+    <span class="c1"># print(dir(err))</span>
+    <span class="c1"># print(err.args)</span>
+    <span class="c1"># print(err.err_type)</span>
+    <span class="c1"># print(err.line, err.col)</span>
+    <span class="c1"># print(err.message)</span>
+    <span class="c1"># print(err.filename)</span>
+    <span class="c1"># print(err.expected_rules)</span>
+    <span class="k">if</span> <span class="s2">&quot;&#39;SELECT&#39;&quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>  <span class="c1"># was awaiting for a SELECT clause</span>
+        <span class="k">return</span> <span class="s2">&quot;no SELECT clause&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="n">err</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;=&gt; &#39;s,ref FROM*&#39;.&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;empty &#39;FROM&#39; clause&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">.</span><span class="n">col</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="s2">&quot;,*,&quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">message</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">expected_rules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">expected_rules</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;RegExMatch&quot;</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;invalid empty identifier in SELECT clause&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">.</span><span class="n">col</span>
+    <span class="k">if</span> <span class="s2">&quot;Expected INT &quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">message</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">expected_rules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;invalid value in WHERE clause&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">.</span><span class="n">col</span>
+    <span class="k">if</span> <span class="s2">&quot;Expected &#39;==|&gt;=|&lt;=|!=&quot;</span> <span class="ow">in</span> <span class="n">err</span><span class="o">.</span><span class="n">message</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">expected_rules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;invalid operator in WHERE clause&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">.</span><span class="n">col</span>
+
+    <span class="k">raise</span> <span class="n">err</span>  <span class="c1"># error not handled. Just raise it</span></div>
+
+
+<span class="c1"># ============ Different class to map with VQL model</span>
+
+
+<span class="k">class</span> <span class="nc">FilterTerm</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span> <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">val</span><span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">FilterExpression</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;AND&quot;</span>  <span class="c1"># By default</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;AND&quot;</span><span class="p">,</span> <span class="s2">&quot;OR&quot;</span><span class="p">):</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">out</span><span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">SetExpression</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;test&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">FilterOperand</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">value</span>
+
+
+<span class="k">class</span> <span class="nc">Function</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extra</span> <span class="o">=</span> <span class="s2">&quot;gt&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Tuple</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">WordSetIdentifier</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;WORDSET&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">SelectCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;select_cmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="n">col</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
+            <span class="p">],</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;filters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;filters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_by</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;group_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">i</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">Function</span><span class="p">)</span> <span class="k">else</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_by</span>
+            <span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;group_by&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">having_op</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">having_val</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;having&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">having_op</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">having_val</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span><span class="p">[</span><span class="s2">&quot;having&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+
+<span class="k">class</span> <span class="nc">CreateCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;create_cmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="k">else</span> <span class="p">{},</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">SetCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;set_cmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+            <span class="s2">&quot;first&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="p">,</span>
+            <span class="s2">&quot;operator&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">op</span><span class="p">,</span>
+            <span class="s2">&quot;second&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">second</span><span class="p">,</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">BedCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;bed_cmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">CopyCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;create_cmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;target&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span>
+        <span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">CountCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;count_cmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>
+            <span class="s2">&quot;filters&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="k">else</span> <span class="p">{},</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">obj</span>
+
+
+<span class="k">class</span> <span class="nc">DropCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;drop_cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">ShowCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;show_cmd&quot;</span><span class="p">,</span> <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">ImportCmd</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">model_class</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;cmd&quot;</span><span class="p">:</span> <span class="s2">&quot;import_cmd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="p">,</span>
+            <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">}</span>
+
+
+<span class="n">METAMODEL</span> <span class="o">=</span> <span class="n">textx</span><span class="o">.</span><span class="n">metamodel_from_str</span><span class="p">(</span>
+    <span class="n">resource_string</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;vql.tx&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span>  <span class="c1"># grammar extraction from vql.tx</span>
+    <span class="n">classes</span><span class="o">=</span><span class="n">model_class</span><span class="o">.</span><span class="n">classes</span><span class="p">,</span>
+    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ignore_case</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="parse_vql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.vql.parse_vql">[docs]</a><span class="k">def</span> <span class="nf">parse_vql</span><span class="p">(</span><span class="n">raw_vql</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Execute multiline VQL statement separated by &quot;;&quot;</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">         (generator[dict]): yield 1 VQL object (a dictionnary) per command</span>
+
+<span class="sd">    Example of VQL object::</span>
+
+<span class="sd">        {</span>
+<span class="sd">            &#39;cmd&#39;: &#39;select_cmd&#39;,</span>
+<span class="sd">            &#39;columns&#39;: [&#39;chr&#39;,&#39;pos&#39;],</span>
+<span class="sd">            &#39;source&#39;:&#39;variants&#39;,</span>
+<span class="sd">            &#39;filter&#39;: &#39;None&#39;</span>
+<span class="sd">        }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">raw_model</span> <span class="o">=</span> <span class="n">METAMODEL</span><span class="o">.</span><span class="n">model_from_str</span><span class="p">(</span><span class="n">raw_vql</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">textx</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">TextXSyntaxError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">VQLSyntaxError</span><span class="p">(</span><span class="o">*</span><span class="n">error_message_from_err</span><span class="p">(</span><span class="n">err</span><span class="p">,</span> <span class="n">raw_vql</span><span class="p">))</span>
+
+    <span class="k">yield from</span> <span class="p">(</span><span class="n">command</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">raw_model</span><span class="o">.</span><span class="n">commands</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_one_vql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.vql.parse_one_vql">[docs]</a><span class="k">def</span> <span class="nf">parse_one_vql</span><span class="p">(</span><span class="n">raw_vql</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Execute 1 VQL statement</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (dict): 1 VQL object</span>
+
+<span class="sd">    Examples of VQL object::</span>
+
+<span class="sd">        {</span>
+<span class="sd">            &#39;cmd&#39;: &#39;select_cmd&#39;,</span>
+<span class="sd">            &#39;columns&#39;: [&#39;chr&#39;,&#39;pos&#39;],</span>
+<span class="sd">            &#39;source&#39;:&#39;variants&#39;,</span>
+<span class="sd">            &#39;filter&#39;: &#39;None&#39;</span>
+<span class="sd">        }</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="n">parse_vql</span><span class="p">(</span><span class="n">raw_vql</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

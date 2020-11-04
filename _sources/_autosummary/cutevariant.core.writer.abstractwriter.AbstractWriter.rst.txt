@@ -1,0 +1,25 @@
+cutevariant.core.writer.abstractwriter.AbstractWriter
+=====================================================
+
+.. currentmodule:: cutevariant.core.writer.abstractwriter
+
+.. autoclass:: AbstractWriter
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~AbstractWriter.__init__
+      ~AbstractWriter.save
+   
+   
+
+   
+   
+   

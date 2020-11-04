@@ -1,5 +1,0 @@
-__title__ = "Auragen Filters"
-__description__ = "A plugin to create filters"
-__long_description__ = ""
-__author__ = "Sacha schutz / Klein "
-__version__ = "1.0.0"

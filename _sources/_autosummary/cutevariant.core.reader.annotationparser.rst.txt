@@ -1,0 +1,33 @@
+cutevariant.core.reader.annotationparser
+========================================
+
+.. automodule:: cutevariant.core.reader.annotationparser
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      BaseParser
+      SnpEffParser
+      VepParser
+   
+   
+
+   
+   
+   
+
+
+

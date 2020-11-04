@@ -1,0 +1,38 @@
+cutevariant.core.reader.csvreader.CsvReader
+===========================================
+
+.. currentmodule:: cutevariant.core.reader.csvreader
+
+.. autoclass:: CsvReader
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~CsvReader.__init__
+      ~CsvReader.compute_number_lines
+      ~CsvReader.get_extra_fields
+      ~CsvReader.get_extra_fields_by_category
+      ~CsvReader.get_extra_variants
+      ~CsvReader.get_fields
+      ~CsvReader.get_fields_by_category
+      ~CsvReader.get_metadatas
+      ~CsvReader.get_samples
+      ~CsvReader.get_total_file_size
+      ~CsvReader.get_variants
+      ~CsvReader.get_variants_count
+      ~CsvReader.location_to_chr_pos
+      ~CsvReader.parse_fields
+      ~CsvReader.parse_variants
+   
+   
+
+   
+   
+   

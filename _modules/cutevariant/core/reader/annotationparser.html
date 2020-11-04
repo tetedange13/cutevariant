@@ -1,0 +1,746 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.annotationparser &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.annotationparser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.reader.annotationparser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Standard imports</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># Custom imports</span>
+<span class="kn">from</span> <span class="nn">.abstractreader</span> <span class="k">import</span> <span class="n">sanitize_field_name</span>
+<span class="kn">from</span> <span class="nn">cutevariant.commons</span> <span class="k">import</span> <span class="n">logger</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logger</span><span class="p">()</span>
+
+<span class="c1"># Dicts of default fields depending to the type of files</span>
+<span class="c1"># Keys are based on fields in files (in lower case),</span>
+<span class="c1"># values are the full description of the field; the name is remaped here as</span>
+<span class="c1"># it wil be shown in the GUI.</span>
+<span class="c1"># PS: Consequences/annotation_impac/impacts are standardized here:</span>
+<span class="c1"># https://www.ensembl.org/info/genome/variation/prediction/predicted_data.html#consequences</span>
+<span class="n">SNPEFF_ANNOTATION_DEFAULT_FIELDS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;allele&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;allele&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Variant allele used to calculate the consequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;feature_type&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;feature_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Type of feature. Currently one of Transcript, RegulatoryFeature, MotifFeature.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;annotation&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;consequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Consequence type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;annotation_impact&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;impact&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Impact rating of variant&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;gene_name&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;gene&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Gene name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;gene_id&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;gene_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensemble stable ID of affected gene&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;feature_id&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;transcript&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Transcript name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;transcript_biotype&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;biotype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Biotype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;hgvs.p&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;hgvs_p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Protein hgvs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;hgvs.c&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;hgvs_c&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Coding hgvs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;cdna.pos / cdna.length&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;cdna_pos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Relative position of base pair in cDNA sequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;cds.pos / cds.length&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;cds_pos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Relative position of base pair in coding sequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;aa.pos / aa.length&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;aa_pos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Amino acid position&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;errors / warnings / info&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;log&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Logging info&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="n">VEP_ANNOTATION_DEFAULT_FIELDS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;allele&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;allele&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Variant allele used to calculate the consequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;consequence&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;consequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Consequence type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;impact&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;impact&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Impact rating of the variant&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;symbol&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;gene&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Gene name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;gene&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;gene_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensemble stable ID of affected gene&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;feature&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;transcript&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Ensemble stable ID of feature&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;feature_type&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;feature_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Type of feature. Currently one of Transcript, RegulatoryFeature, MotifFeature.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;biotype&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;biotype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Biotype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;hgvsp&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;hgvs_p&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Protein hgvs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;hgvsc&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;hgvs_c&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Coding hgvs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;cdna_position&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;cdna_pos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Relative position of base pair in cDNA sequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;cds_position&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;cds_pos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Relative position of base pair in coding sequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;protein_position&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;aa_pos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Relative position of amino acid in protein&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;amino_acids&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;amino_acids&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reference and variant amino acids; only given if the variant affects the protein-coding sequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;codons&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;codons&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reference and variant codon sequence&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;existing_variation&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;existing_variation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Identifier(s) of co-located known variants&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="BaseParser"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.BaseParser.html#cutevariant.core.reader.annotationparser.BaseParser">[docs]</a><span class="k">class</span> <span class="nc">BaseParser</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Base class that brings together common functions of VepParser and SnpEffParser&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BaseParser.__init__"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.BaseParser.html#cutevariant.core.reader.annotationparser.BaseParser.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># Receive a dict to map default field names:</span>
+        <span class="c1"># external to internal with descriptions</span>
+        <span class="c1"># { external_name: { name: internal_name, category: ..., description: ...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_default_fields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1"># Help to remove duplicated fields in annotations</span>
+        <span class="c1"># If an annotation field is found in this set by the annotation parser</span>
+        <span class="c1"># BaseParser.handle_descriptions(), it will not be yielded and thus not</span>
+        <span class="c1"># used by the program.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variant_field_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c1"># About self.annotation_field_name</span>
+        <span class="c1"># The value of this attribute is deliberately None from the base</span>
+        <span class="c1"># class because it is created when fields are parsed and it is an</span>
+        <span class="c1"># insurance that the fields have been processed before variants.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="BaseParser.handle_descriptions"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.BaseParser.html#cutevariant.core.reader.annotationparser.BaseParser.handle_descriptions">[docs]</a>    <span class="k">def</span> <span class="nf">handle_descriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_fields</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct annotation_field_name with the fields of the file, and</span>
+<span class="sd">        yield fields (dictionnaries) with the full description of fields of the file.</span>
+
+<span class="sd">        :Example:</span>
+<span class="sd">            If &#39;protein_position&#39; field is encountered in a VEP file,</span>
+<span class="sd">            &#39;self.annotation_field_name&#39; attribute will contain:</span>
+<span class="sd">            [&#39;protein_position&#39;,] and the followwing dictionnary will be yielded::</span>
+
+<span class="sd">                {</span>
+<span class="sd">                    &quot;name&quot;: &quot;aa_pos&quot;,</span>
+<span class="sd">                    &quot;category&quot;: &quot;annotations&quot;,</span>
+<span class="sd">                    &quot;description&quot;: &quot;amino acid pos&quot;,</span>
+<span class="sd">                    &quot;type&quot;: &quot;str&quot;,</span>
+<span class="sd">                }</span>
+
+<span class="sd">            If a field is not provided, a default dictionary with less</span>
+<span class="sd">            information is returned::</span>
+
+<span class="sd">                {</span>
+<span class="sd">                    &quot;name&quot;: &lt;field_name&gt;,</span>
+<span class="sd">                    &quot;description&quot;: &quot;&quot;,</span>
+<span class="sd">                    &quot;type&quot;:&quot;str&quot;,</span>
+<span class="sd">                    &quot;category&quot;:&quot;annotations&quot;</span>
+<span class="sd">                }</span>
+
+<span class="sd">        :param raw_fields: List of fields names.</span>
+<span class="sd">        :type raw_fields: &lt;list&gt;</span>
+<span class="sd">        :rtype: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">raw_field_name</span> <span class="ow">in</span> <span class="n">raw_fields</span><span class="p">:</span>
+            <span class="n">raw_field_name</span> <span class="o">=</span> <span class="n">raw_field_name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+            <span class="c1"># Remap field name if it is in default ones</span>
+            <span class="k">if</span> <span class="n">raw_field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_default_fields</span><span class="p">:</span>
+                <span class="n">_f</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_default_fields</span><span class="p">[</span><span class="n">raw_field_name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Sanitize fields names here</span>
+                <span class="c1"># PS: If name is in annotation_default_fields it will be modified</span>
+                <span class="c1"># by the previous condition.</span>
+                <span class="n">raw_field_name</span> <span class="o">=</span> <span class="n">sanitize_field_name</span><span class="p">(</span><span class="n">raw_field_name</span><span class="p">)</span>
+                <span class="n">_f</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">raw_field_name</span><span class="p">,</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+
+            <span class="k">if</span> <span class="n">_f</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variant_field_names</span><span class="p">:</span>
+                <span class="c1"># This field is already in variants fields</span>
+                <span class="c1"># =&gt; do not use it!</span>
+                <span class="c1"># Append None in place of the name of the field</span>
+                <span class="c1"># with the aim to not break handle_annotations() when it splits</span>
+                <span class="c1"># the annotation field.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;handle_descriptions: &#39;</span><span class="si">%s</span><span class="s2">&#39; field also found in variants; skipped&quot;</span><span class="p">,</span>
+                    <span class="n">_f</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Append the name of the field</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_f</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+            <span class="c1"># Yield full field</span>
+            <span class="k">yield</span> <span class="n">_f</span></div>
+
+<div class="viewcode-block" id="BaseParser.handle_annotations"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.BaseParser.html#cutevariant.core.reader.annotationparser.BaseParser.handle_annotations">[docs]</a>    <span class="k">def</span> <span class="nf">handle_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotation_key_name</span><span class="p">,</span> <span class="n">variant</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the given key from the variant dict, add &quot;annotations&quot; key with</span>
+<span class="sd">        the list of annotations into the variant dict.</span>
+
+<span class="sd">        .. note:: The given variant is modified in place.</span>
+
+<span class="sd">        Structure of &quot;annotations&quot; value::</span>
+
+<span class="sd">            [{</span>
+<span class="sd">                &#39;annotation_field_name1&#39;: &#39;data1&#39;,</span>
+<span class="sd">                &#39;annotation_field_name2&#39;: &#39;data2&#39;,</span>
+<span class="sd">                ...</span>
+<span class="sd">            },]</span>
+
+<span class="sd">        &quot;annotations&quot; is a list since there may be multiple annotations for</span>
+<span class="sd">        a variant.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">annotation_key_name</span><span class="p">)</span>
+
+        <span class="n">annotations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">transcripts</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+            <span class="n">transcript</span> <span class="o">=</span> <span class="n">transcripts</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">transcript</span><span class="p">):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;BaseParser:handle_annotations:: Missing field in the &quot;</span>
+                    <span class="s2">&quot;annotations of the following variant:</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;These annotations will be skipped!&quot;</span><span class="p">,</span>
+                    <span class="n">variant</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="n">annotation</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">field_name</span><span class="p">:</span> <span class="n">transcript</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span><span class="p">)</span>
+                <span class="c1"># Remove duplicated fields in variants, see handle_descriptions()</span>
+                <span class="k">if</span> <span class="n">field_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">}</span>
+            <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+        <span class="c1"># Avoid setting empty list to the variant =&gt; generates a SQL query issue</span>
+        <span class="k">if</span> <span class="n">annotations</span><span class="p">:</span>
+            <span class="n">variant</span><span class="p">[</span><span class="s2">&quot;annotations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">annotations</span></div></div>
+
+
+<div class="viewcode-block" id="VepParser"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.VepParser.html#cutevariant.core.reader.annotationparser.VepParser">[docs]</a><span class="k">class</span> <span class="nc">VepParser</span><span class="p">(</span><span class="n">BaseParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parser of VEP annotations</span>
+
+<span class="sd">    .. note:: We assume that the description field looks like this:</span>
+<span class="sd">        ##INFO=&lt;ID=CSQ,Number=.,Type=String,Description=&quot;Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Featur..&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="VepParser.__init__"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.VepParser.html#cutevariant.core.reader.annotationparser.VepParser.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># Dict of dicts</span>
+        <span class="c1"># annotation field name as keys, descriptions (name/value) as values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_default_fields</span> <span class="o">=</span> <span class="n">VEP_ANNOTATION_DEFAULT_FIELDS</span></div>
+
+<div class="viewcode-block" id="VepParser.parse_fields"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.VepParser.html#cutevariant.core.reader.annotationparser.VepParser.parse_fields">[docs]</a>    <span class="k">def</span> <span class="nf">parse_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate fields description</span>
+
+<span class="sd">        Called by a reader when its get_fields() method is called and when</span>
+<span class="sd">        an annotation parser is set.</span>
+
+<span class="sd">        This function parses special annotation field &quot;csq&quot;/&quot;CSQ&quot;,</span>
+<span class="sd">        other fields are yielded without being affected.</span>
+
+<span class="sd">        .. seealso:: :meth:`handle_descriptions`</span>
+
+<span class="sd">        :param fields: Tuple of fields.</span>
+<span class="sd">        :type fields: &lt;tuple &lt;dict&gt;&gt;</span>
+<span class="sd">        :return: Generator of fields descriptions.</span>
+<span class="sd">        :rtype: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="c1"># PS: fields names are already sanitized by VcfReader get_fields()</span>
+        <span class="c1"># annotations field names will be sanitized in handle_descriptions()</span>
+
+        <span class="c1"># Help to remove duplicated fields from annotations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variant_field_names</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span> <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;csq&quot;</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;csq&quot;</span><span class="p">:</span>
+                <span class="c1"># Handle description field and parse annotations in it</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+                <span class="c1"># Assume description looks like this :</span>
+                <span class="c1"># ##INFO=&lt;ID=CSQ,Number=.,Type=String,Description=&quot;Consequence annotations from Ensembl VEP. Format: field1|field2|...&quot;</span>
+
+                <span class="n">raw_fields</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;Format: (.+)&quot;</span><span class="p">,</span> <span class="n">description</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+
+                <span class="c1"># yield full remaped field</span>
+                <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_descriptions</span><span class="p">(</span><span class="n">raw_fields</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">field</span></div>
+
+<div class="viewcode-block" id="VepParser.parse_variants"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.VepParser.html#cutevariant.core.reader.annotationparser.VepParser.parse_variants">[docs]</a>    <span class="k">def</span> <span class="nf">parse_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variants</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate variants data</span>
+
+<span class="sd">        This function removes the key &quot;csq&quot; from the variants,</span>
+<span class="sd">        and add &quot;annotations&quot; key with the list of annotations.</span>
+
+<span class="sd">        .. seealso:: :meth:`handle_annotations`</span>
+
+<span class="sd">        :param variants: Generator of variants.</span>
+<span class="sd">        :type variants: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        :return: Generator of full variants with &quot;annotations&quot; key.</span>
+<span class="sd">        :rtype: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot parse variant without parsing first fields&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">variants</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;csq&quot;</span> <span class="ow">in</span> <span class="n">variant</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">handle_annotations</span><span class="p">(</span><span class="s2">&quot;csq&quot;</span><span class="p">,</span> <span class="n">variant</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">variant</span></div></div>
+
+
+<div class="viewcode-block" id="SnpEffParser"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.SnpEffParser.html#cutevariant.core.reader.annotationparser.SnpEffParser">[docs]</a><span class="k">class</span> <span class="nc">SnpEffParser</span><span class="p">(</span><span class="n">BaseParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parser for SnpEFF annotations</span>
+
+<span class="sd">    .. note:: We assume that the description field looks like this:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            INFO=&lt;ID=ANN,Number=.,Type=String,Description=&quot;Functional annotations: &#39;Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length |CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO&#39; &quot;&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SnpEffParser.__init__"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.SnpEffParser.html#cutevariant.core.reader.annotationparser.SnpEffParser.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># Dict of dicts</span>
+        <span class="c1"># annotation field name as keys, descriptions (name/value) as values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_default_fields</span> <span class="o">=</span> <span class="n">SNPEFF_ANNOTATION_DEFAULT_FIELDS</span></div>
+
+<div class="viewcode-block" id="SnpEffParser.parse_fields"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.SnpEffParser.html#cutevariant.core.reader.annotationparser.SnpEffParser.parse_fields">[docs]</a>    <span class="k">def</span> <span class="nf">parse_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate fields description</span>
+
+<span class="sd">        Called by a reader when its get_fields() method is called and when</span>
+<span class="sd">        an annotation parser is set.</span>
+
+<span class="sd">        This function parses special annotation field &quot;ann&quot;/&quot;ANN&quot;,</span>
+<span class="sd">        other fields are yielded without being affected.</span>
+
+<span class="sd">        .. seealso:: :meth:`handle_descriptions`</span>
+
+<span class="sd">        Input example::</span>
+
+<span class="sd">            ({</span>
+<span class="sd">            &#39;name&#39;: &#39;generic_field1&#39;,</span>
+<span class="sd">            &#39;description&#39;: ...</span>
+<span class="sd">            &#39;category&#39;: ...</span>
+<span class="sd">            &#39;type&#39;: ...</span>
+<span class="sd">            },</span>
+<span class="sd">            {</span>
+<span class="sd">            &#39;name&#39;: &#39;ann&#39;,</span>
+<span class="sd">            &#39;description&#39;: &#39;... annotation_field_name1 | annotation_field_name2 ...&#39;,</span>
+<span class="sd">            ...</span>
+<span class="sd">            })</span>
+
+<span class="sd">        Output example::</span>
+
+<span class="sd">            ({</span>
+<span class="sd">            &#39;name&#39;: &#39;generic_field1&#39;,</span>
+<span class="sd">            &#39;description&#39;: ...</span>
+<span class="sd">            &#39;category&#39;: ...</span>
+<span class="sd">            &#39;type&#39;: ...</span>
+<span class="sd">            },</span>
+<span class="sd">            {</span>
+<span class="sd">            &#39;name&#39;: &#39;annotation_field_name1&#39;,</span>
+<span class="sd">            &#39;description&#39;: ...</span>
+<span class="sd">            &#39;category&#39;: ...</span>
+<span class="sd">            &#39;type&#39;: ...</span>
+<span class="sd">            },</span>
+<span class="sd">            {</span>
+<span class="sd">            &#39;name&#39;: &#39;annotation_field_name2&#39;,</span>
+<span class="sd">            &#39;description&#39;: ...</span>
+<span class="sd">            &#39;category&#39;: ...</span>
+<span class="sd">            &#39;type&#39;: ...</span>
+<span class="sd">            })</span>
+
+<span class="sd">        .. note:: Names of fields are changed to lowercase.</span>
+
+<span class="sd">        :param fields: Generator of fields.</span>
+<span class="sd">        :type fields: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        :return: Generator of full fields descriptions.</span>
+<span class="sd">        :rtype: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="c1"># Help to remove duplicated fields from annotations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variant_field_names</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span> <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;ann&quot;</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ann&quot;</span><span class="p">:</span>
+                <span class="c1"># Handle description field and parse annotations in it</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">field</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+                <span class="c1"># Assume description looks like this :</span>
+                <span class="c1"># INFO=&lt;ID=ANN,Number=.,Type=String,Description=&quot;Functional annotations: &#39;field1 | field2 | ...&#39; &quot;&gt;</span>
+
+                <span class="n">raw_fields</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;&#39;(.+)&#39;&quot;</span><span class="p">,</span> <span class="n">description</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+
+                <span class="c1"># yield full remaped field</span>
+                <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_descriptions</span><span class="p">(</span><span class="n">raw_fields</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Field is not an annotation: do nothing</span>
+                <span class="k">yield</span> <span class="n">field</span></div>
+
+<div class="viewcode-block" id="SnpEffParser.parse_variants"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.annotationparser.SnpEffParser.html#cutevariant.core.reader.annotationparser.SnpEffParser.parse_variants">[docs]</a>    <span class="k">def</span> <span class="nf">parse_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variants</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate variants data</span>
+
+<span class="sd">        This function removes the key &quot;ann&quot; from the variants,</span>
+<span class="sd">        and add &quot;annotations&quot; key with the list of annotations.</span>
+
+<span class="sd">        .. seealso:: :meth:`handle_annotations`</span>
+
+<span class="sd">        :param variants: Generator of variants.</span>
+<span class="sd">        :type variants: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        :return: Generator of full variants with &quot;annotations&quot; key.</span>
+<span class="sd">        :rtype: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_field_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot parse variant without parsing first fields&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">variants</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;ann&quot;</span> <span class="ow">in</span> <span class="n">variant</span><span class="p">:</span>
+                <span class="c1"># Modify the current variant:</span>
+                <span class="c1"># remove &quot;ann&quot; data, replace it with &quot;annotations&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">handle_annotations</span><span class="p">(</span><span class="s2">&quot;ann&quot;</span><span class="p">,</span> <span class="n">variant</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">variant</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

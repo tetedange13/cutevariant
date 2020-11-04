@@ -1,0 +1,25 @@
+cutevariant.core.reader.pedreader.PedReader
+===========================================
+
+.. currentmodule:: cutevariant.core.reader.pedreader
+
+.. autoclass:: PedReader
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PedReader.__init__
+      ~PedReader.get_samples
+   
+   
+
+   
+   
+   

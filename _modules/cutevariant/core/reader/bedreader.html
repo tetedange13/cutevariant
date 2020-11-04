@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.bedreader &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.bedreader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.reader.bedreader</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module to handle BED files&quot;&quot;&quot;</span>
+<span class="c1"># Standard imports</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># Custom imports</span>
+<span class="kn">import</span> <span class="nn">cutevariant.commons</span> <span class="k">as</span> <span class="nn">cm</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">logger</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="BedReader"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.bedreader.BedReader.html#cutevariant.core.reader.bedreader.BedReader">[docs]</a><span class="k">class</span> <span class="nc">BedReader</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;BED file parser</span>
+
+<span class="sd">    It is a substitution to pybedtools that is a (too) big black box to make lots</span>
+<span class="sd">    of things, while we only need the file parser.</span>
+<span class="sd">    Thus, pybedtools is not multiplatform compatible (thanks to Winshit OS).</span>
+<span class="sd">    Thus (again), pybedtools doesn&#39;t support files with spaces as separators</span>
+<span class="sd">    (while the specification is implicit about it)...</span>
+
+<span class="sd">    We support:</span>
+<span class="sd">        - Simple text files</span>
+<span class="sd">        - BED data as string</span>
+<span class="sd">        - Compressed gzip files</span>
+<span class="sd">        - Tabs and spaces files</span>
+<span class="sd">        - Bedgraph files</span>
+<span class="sd">        - BED files with headers</span>
+
+<span class="sd">    .. seealso:: BED specs: https://www.ensembl.org/info/website/upload/bed.html</span>
+
+<span class="sd">    How to use::</span>
+
+<span class="sd">        intervals = BedReader(&quot;myfile.bed.gz)</span>
+<span class="sd">        generator = iter(intervals)</span>
+<span class="sd">        first_interval = next(generator)</span>
+
+<span class="sd">        intervals = BedReader(&quot;myfile.bed)</span>
+
+<span class="sd">        large_string = \&quot;&quot;&quot;</span>
+            <span class="n">chr1</span> <span class="mi">1</span>    <span class="mi">10</span>   <span class="n">feature1</span>  <span class="mi">0</span> <span class="o">+</span>
+            <span class="n">chr1</span> <span class="mi">50</span>   <span class="mi">60</span>   <span class="n">feature2</span>  <span class="mi">0</span> <span class="o">-</span>
+            <span class="n">chr1</span> <span class="mi">51</span> <span class="mi">59</span> <span class="n">another_feature</span> <span class="mi">0</span> <span class="o">+</span>
+        \<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        intervals = BedReader(large_string)</span>
+
+<span class="s2">        for interval in intervals:</span>
+<span class="s2">            print(interval)</span>
+<span class="s2">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BedReader.__init__"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.bedreader.BedReader.html#cutevariant.core.reader.bedreader.BedReader.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+
+        <span class="c1"># Autodetection of string and filepaths</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_from_string</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_gz_file</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_from_string</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_gz_file</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">is_gz_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield Interval objects in the given BED file</span>
+
+<span class="sd">        Each Interval object is an OrderedDict with the following keys:</span>
+<span class="sd">            - chrom</span>
+<span class="sd">            - start</span>
+<span class="sd">            - end</span>
+<span class="sd">            - name</span>
+<span class="sd">            - score</span>
+<span class="sd">            - strand</span>
+<span class="sd">            - thickStart</span>
+<span class="sd">            - thickEnd</span>
+<span class="sd">            - itemRgb</span>
+<span class="sd">            - blockCount</span>
+<span class="sd">            - blockSizes</span>
+<span class="sd">            - blockStarts</span>
+
+<span class="sd">        Excedent data is put in and additional column &#39;misc&#39;.</span>
+<span class="sd">        Empty columns contain None values.</span>
+
+<span class="sd">        :return: Generator of Intervals</span>
+<span class="sd">        :rtype: &lt;generator &lt;OrderectDict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_from_string</span><span class="p">:</span>
+            <span class="c1"># Clean the string:</span>
+            <span class="c1"># Remove spaces at the start and end</span>
+            <span class="c1"># Remove duplicated spaces in the string</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; +&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+            <span class="c1"># Load in memory file</span>
+            <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_intervals</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_gz_file</span><span class="p">:</span>
+                <span class="c1"># Handle gzip file</span>
+                <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;rt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+                    <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_intervals</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Handle text file</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+                    <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_intervals</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BedReader.get_intervals"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.bedreader.BedReader.html#cutevariant.core.reader.bedreader.BedReader.get_intervals">[docs]</a>    <span class="k">def</span> <span class="nf">get_intervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield Interval objects in the given stream</span>
+
+<span class="sd">        .. seealso:: :meth:`__iter__`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Throws line with headers</span>
+        <span class="n">skipped_header_line</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Will be used to rewind the stream</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;@&quot;</span><span class="p">,</span> <span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="s2">&quot;track&quot;</span><span class="p">,</span> <span class="s2">&quot;browser&quot;</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="c1"># Header detected</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;comment: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+                <span class="n">skipped_header_line</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">break</span>
+
+        <span class="c1"># Quick tests on the first line of data...</span>
+        <span class="c1"># Delimiters can only be &#39;\t&#39; or &#39; &#39; since</span>
+        <span class="c1"># &#39;itemRgb&#39; column is comma separated.</span>
+
+        <span class="c1"># Rewind the stream</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">skipped_header_line</span><span class="p">)]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># If there is no data at all or after the header</span>
+            <span class="n">data_line</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No interval detected in the given BED file!&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">csv_dialect</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">data_line</span><span class="p">,</span> <span class="n">delimiters</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> &quot;</span><span class="p">)</span>
+
+        <span class="c1"># Rewind the stream</span>
+        <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">skipped_header_line</span><span class="p">)]</span>
+        <span class="c1"># Build a csv reader</span>
+        <span class="n">bed_fieldnames</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;chrom&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;start&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;score&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;strand&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;thickStart&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;thickEnd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;itemRgb&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blockCount&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blockSizes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;blockStarts&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">csv_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span>
+            <span class="n">stream</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">bed_fieldnames</span><span class="p">,</span> <span class="n">restkey</span><span class="o">=</span><span class="s2">&quot;misc&quot;</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">csv_dialect</span>
+        <span class="p">)</span>
+
+        <span class="n">line_number</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line_number</span><span class="p">,</span> <span class="n">interval</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">csv_reader</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># print(interval)</span>
+            <span class="k">yield</span> <span class="n">interval</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">line_number</span></div></div>
+
+
+<div class="viewcode-block" id="parse_bed_file"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.bedreader.parse_bed_file.html#cutevariant.core.reader.bedreader.parse_bed_file">[docs]</a><span class="k">def</span> <span class="nf">parse_bed_file</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse the given BED file with &#39;pybedtools&#39; package, yield features in the file</span>
+
+<span class="sd">    .. note:: chromosom field is processed to remove &#39;chr&#39; prefixes.</span>
+
+<span class="sd">    .. note:: Intervals yielded have the following attributes:</span>
+<span class="sd">        interval.chrom, interval.start, interval.stop</span>
+
+<span class="sd">        Other attributes are described here:</span>
+<span class="sd">        https://daler.github.io/pybedtools/intervals.html</span>
+
+<span class="sd">    We assume that the given BED file is composed of lines with the following fields:</span>
+<span class="sd">        - chromosom</span>
+<span class="sd">        - start position</span>
+<span class="sd">        - end position</span>
+
+<span class="sd">    .. seealso:: https://www.ensembl.org/info/website/upload/bed.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bedtool</span> <span class="o">=</span> <span class="n">BedReader</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">bedtool</span><span class="p">:</span>
+        <span class="c1"># Remove &#39;chr&#39; prefix from the chromosome name</span>
+        <span class="c1"># interval[&quot;chrom&quot;] = interval[&quot;chrom&quot;].replace(&quot;chr&quot;, &quot;&quot;)</span>
+
+        <span class="k">yield</span> <span class="n">interval</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

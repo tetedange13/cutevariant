@@ -1,0 +1,28 @@
+cutevariant.core.reader.annotationparser.VepParser
+==================================================
+
+.. currentmodule:: cutevariant.core.reader.annotationparser
+
+.. autoclass:: VepParser
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~VepParser.__init__
+      ~VepParser.handle_annotations
+      ~VepParser.handle_descriptions
+      ~VepParser.parse_fields
+      ~VepParser.parse_variants
+   
+   
+
+   
+   
+   

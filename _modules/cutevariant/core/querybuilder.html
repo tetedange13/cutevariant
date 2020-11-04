@@ -1,0 +1,844 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.querybuilder &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.querybuilder</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.querybuilder</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Functions to build a complex SQL Select statement to query variant.</span>
+
+<span class="sd">In the most of cases, you will only use build_sql_query function.</span>
+
+<span class="sd">Examples::</span>
+
+<span class="sd">    conn = sqlite3.Connection(&quot;::memory::&quot;)</span>
+<span class="sd">    query = build_sql_query([&quot;chr&quot;,&quot;pos&quot;])</span>
+<span class="sd">    conn.execute(query)</span>
+
+
+<span class="sd">A variant query can be understood from the following 3 points of view.</span>
+
+<span class="sd">The SQL statements:</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~</span>
+<span class="sd">This is the raw sqlite query::</span>
+
+<span class="sd">    &quot;SELECT `variants`.`chr`, `variants`.`pos` FROM `variants` WHERE `variants`.`ref` == &#39;A&#39; &quot;</span>
+
+<span class="sd">The VQL statements:</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~</span>
+<span class="sd">This is a domain specific language. Check the vql module for more information::</span>
+
+<span class="sd">    &quot;SELECT chr, pos FROM variants WHERE ref == &#39;A&#39;&quot;</span>
+
+<span class="sd">The Python statements:</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="sd">The representation of the query as a dictionnary::</span>
+
+<span class="sd">    query = {</span>
+<span class="sd">        &quot;fields&quot;: [&quot;chr&quot;,&quot;pos&quot;],</span>
+<span class="sd">        &quot;source&quot;: &quot;variants&quot;,</span>
+<span class="sd">        &quot;filters&quot;: {</span>
+<span class="sd">        &quot;AND&quot;:</span>
+<span class="sd">            [</span>
+<span class="sd">                {&quot;name&quot;:&quot;ref&quot;, &quot;operator&quot;:&quot;==&quot;,&quot;value&quot;:&quot;A&quot;}</span>
+<span class="sd">            ]</span>
+<span class="sd">        }</span>
+<span class="sd">    }</span>
+
+<span class="sd">The following module contains several functions to make easy conversion from</span>
+<span class="sd">Python statements to VQL or SQL statements .</span>
+
+<span class="sd">In the most of the case, you only need to use :</span>
+
+<span class="sd">- :meth:`build_vql_query`: to create a VQL query from python statements</span>
+<span class="sd">- :meth:`build_sql_query`: to create a SQL query from python statements</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Standard imports</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
+<span class="c1"># Custom imports</span>
+<span class="kn">from</span> <span class="nn">cutevariant.core</span> <span class="k">import</span> <span class="n">sql</span>
+<span class="kn">from</span> <span class="nn">cutevariant.commons</span> <span class="k">import</span> <span class="n">logger</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logger</span><span class="p">()</span>
+
+<span class="c1"># TODO : can be move somewhere else ? In common ?</span>
+<span class="c1"># Function names used in VQL</span>
+<span class="c1"># sample[&quot;boby&quot;].gt</span>
+<span class="n">GENOTYPE_FUNC_NAME</span> <span class="o">=</span> <span class="s2">&quot;sample&quot;</span>
+<span class="c1"># WORDSET[&quot;truc&quot;]</span>
+<span class="n">WORDSET_FUNC_NAME</span> <span class="o">=</span> <span class="s2">&quot;WORDSET&quot;</span>
+
+
+<div class="viewcode-block" id="filters_to_flat"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.filters_to_flat">[docs]</a><span class="k">def</span> <span class="nf">filters_to_flat</span><span class="p">(</span><span class="n">filters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recursive function to convert the filter hierarchical dictionnary into a list of fields</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filters (dict): a nested tree of condition. @See example</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (list): all fields are now inside a a list</span>
+
+<span class="sd">    .. todo:: Move to vql ?</span>
+
+<span class="sd">    Examples::</span>
+
+<span class="sd">        filters = {</span>
+<span class="sd">            &#39;AND&#39;: [</span>
+<span class="sd">                {&#39;field&#39;: &#39;ref&#39;, &#39;operator&#39;: &#39;=&#39;, &#39;value&#39;: &quot;A&quot;},</span>
+<span class="sd">                {&#39;field&#39;: &#39;alt&#39;, &#39;operator&#39;: &#39;=&#39;, &#39;value&#39;: &quot;C&quot;}</span>
+<span class="sd">            ]</span>
+<span class="sd">        }</span>
+
+<span class="sd">        filters = _flatten_filter(filters)</span>
+
+<span class="sd">        filters is now:</span>
+<span class="sd">        [</span>
+<span class="sd">            {&#39;field&#39;: &#39;ref&#39;, &#39;operator&#39;: &#39;=&#39;, &#39;value&#39;: &quot;A&quot;},</span>
+<span class="sd">            {&#39;field&#39;: &#39;alt&#39;, &#39;operator&#39;: &#39;=&#39;, &#39;value&#39;: &quot;C&quot;}</span>
+<span class="sd">        ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">recursive_generator</span><span class="p">(</span><span class="n">filters</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># length = 3 to skip AND/OR levels</span>
+            <span class="k">yield</span> <span class="n">filters</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+                <span class="k">yield from</span> <span class="n">recursive_generator</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+                <span class="k">yield from</span> <span class="n">recursive_generator</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">recursive_generator</span><span class="p">(</span><span class="n">filters</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="field_function_to_sql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.field_function_to_sql">[docs]</a><span class="k">def</span> <span class="nf">field_function_to_sql</span><span class="p">(</span><span class="n">field_function</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">use_as</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert VQL function to a a jointure field name</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        &gt;&gt;&gt; # which correspond to genotype(boby).GT in VQL</span>
+<span class="sd">        &gt;&gt;&gt; field = (&quot;genotype&quot;, &quot;boby&quot;, &quot;gt&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; field_function_to_sql(field)</span>
+<span class="sd">        &quot;`genotype_boby`.`gt`&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">func_name</span><span class="p">,</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">field_name</span> <span class="o">=</span> <span class="n">field_function</span>
+
+    <span class="k">if</span> <span class="n">use_as</span><span class="p">:</span>
+        <span class="c1"># THIS IS INSANE... SQLITE DOESNT RETURN ALIAS NAME WITH SQUARE BRACKET....</span>
+        <span class="c1"># I HAVE TO replace [] by () and go back after...</span>
+        <span class="c1"># TODO : Change VQL Syntax from [] to () would be a good alternative</span>
+        <span class="c1"># See : https://stackoverflow.com/questions/41538952/issue-cursor-description-never-returns-square-bracket-in-column-name-python-2-7-sqlite3-alias</span>
+        <span class="n">alias_name</span> <span class="o">=</span> <span class="n">fields_to_vql</span><span class="p">(</span><span class="n">field_function</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;(&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="s2">&quot;)&quot;</span><span class="p">)</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="s1">&#39; AS &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alias_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">field_name</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;`</span><span class="si">{func_name}</span><span class="s2">_</span><span class="si">{arg_name}</span><span class="s2">`.`</span><span class="si">{field_name}</span><span class="s2">`&quot;</span> <span class="o">+</span> <span class="n">suffix</span>
+    <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;`</span><span class="si">{func_name}</span><span class="s2">_</span><span class="si">{arg_name}</span><span class="s2">`&quot;</span> <span class="o">+</span> <span class="n">suffix</span></div>
+
+
+<div class="viewcode-block" id="wordset_data_to_sql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.wordset_data_to_sql">[docs]</a><span class="k">def</span> <span class="nf">wordset_data_to_sql</span><span class="p">(</span><span class="n">wordset_expr</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the SQL version of a Wordset expression (`(WORDSET&#39;, &#39;boby&#39;)`)</span>
+
+<span class="sd">    Wordset function is used in VQL to filter fields within a set of words.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        .. code-block:: sql</span>
+
+<span class="sd">            SELECT ... WHERE gene IN WORDSET(&#39;boby&#39;)</span>
+<span class="sd">            -- will be replaced by:</span>
+<span class="sd">            SELECT ... WHERE gene IN (SELECT value FROM sets WHERE name = &#39;boby&#39;)</span>
+
+<span class="sd">        We return only the sub SELECT statement here::</span>
+
+<span class="sd">            &gt;&gt;&gt; wordset_data_to_sql((&quot;WORDSET&quot;, &quot;boby&quot;))</span>
+<span class="sd">            &quot;SELECT value FROM sets WHERE name = &#39;boby&#39;&quot;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        wordset_expr (tuple): Tuple of 2 items: First one is &quot;WORDSET&quot;,</span>
+<span class="sd">            second one is the name of the queried wordset.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        (str): Query statement</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">func_name</span><span class="p">,</span> <span class="n">arg_name</span> <span class="o">=</span> <span class="n">wordset_expr</span>
+    <span class="k">assert</span> <span class="n">func_name</span> <span class="o">==</span> <span class="n">WORDSET_FUNC_NAME</span>
+    <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;(SELECT value FROM wordsets WHERE name = &#39;</span><span class="si">{arg_name}</span><span class="s2">&#39;)&quot;</span></div>
+
+
+<div class="viewcode-block" id="wordset_data_to_vql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.wordset_data_to_vql">[docs]</a><span class="k">def</span> <span class="nf">wordset_data_to_vql</span><span class="p">(</span><span class="n">wordset_expr</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the VQL version of a Wordset expression (`(WORDSET&#39;, &#39;boby&#39;)`)</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        &gt;&gt;&gt; wordset_data_to_vql((&quot;WORDSET&quot;, &quot;boby&quot;))</span>
+<span class="sd">        &quot;WORDSET[&#39;boby&#39;]&quot;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        wordset_expr (tuple): Tuple of 2 items: First one is &quot;WORDSET&quot;,</span>
+<span class="sd">            second one is the name of the queried wordset.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        (str): Query statement</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">[&#39;</span><span class="si">{}</span><span class="s2">&#39;]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">wordset_expr</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fields_to_vql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.fields_to_vql">[docs]</a><span class="k">def</span> <span class="nf">fields_to_vql</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return field as VQL syntax</span>
+
+<span class="sd">    This is used to convert tuple field and create a VQL query</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; field = (&quot;sample&quot;, &quot;boby&quot;, &quot;gt&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; field_to_vql(field)</span>
+<span class="sd">        &quot;sample[&#39;boby&#39;].gt&quot;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        field(str or tuple): a Field</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: fields for vql query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">GENOTYPE_FUNC_NAME</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;</span><span class="si">{field[0]}</span><span class="s2">[&#39;</span><span class="si">{field[1]}</span><span class="s2">&#39;].</span><span class="si">{field[2]}</span><span class="s2">&quot;</span>
+    <span class="c1"># str</span>
+    <span class="k">return</span> <span class="n">field</span></div>
+
+
+<div class="viewcode-block" id="fields_to_sql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.fields_to_sql">[docs]</a><span class="k">def</span> <span class="nf">fields_to_sql</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">default_tables</span><span class="o">=</span><span class="p">{},</span> <span class="n">use_as</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return field as SQL syntax</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        field (str or tuple): Column name from a table</span>
+<span class="sd">        default_tables (dict, optional): association between field name and table origin</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Sql field</span>
+
+<span class="sd">    Examples:</span>
+
+<span class="sd">        &gt;&gt;&gt; default_tables = {&quot;variants.chr&quot;: &quot;variants&quot;, &quot;alt&quot;: &quot;variants&quot;}</span>
+<span class="sd">        &gt;&gt;&gt; fields_to_sql(&quot;chr&quot;, default_tables=default_tables)</span>
+<span class="sd">        &quot;`variants`.`chr`&quot;</span>
+<span class="sd">        &gt;&gt;&gt; fields_to_sql(&quot;gene&quot;, default_tables=default_tables)</span>
+<span class="sd">        &quot;`annotations`.`gene`&quot;</span>
+<span class="sd">        &gt;&gt;&gt; fields_to_sql(&quot;coucou&quot;, default_tables=default_tables)</span>
+<span class="sd">        &quot;`coucou`&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="c1"># If it is &quot;genotype.name.truc then it is field function&quot;</span>
+        <span class="c1"># (&quot;genotype&quot;, &quot;boby&quot;, &quot;gt&quot;) =&gt; `genotype_boby`.GT</span>
+        <span class="k">return</span> <span class="n">field_function_to_sql</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">use_as</span><span class="p">)</span>
+
+    <span class="c1"># extract variants.chr =&gt; (variants, chr) =&gt; `variants`.`chr`</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(\w+)\.(\w+)&quot;</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">default_tables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># Set the table</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">default_tables</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Unknown table, just return the field</span>
+            <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;`</span><span class="si">{field}</span><span class="s2">`&quot;</span>
+
+    <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;`</span><span class="si">{table}</span><span class="s2">`.`</span><span class="si">{field}</span><span class="s2">`&quot;</span></div>
+
+
+<div class="viewcode-block" id="filters_to_sql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.filters_to_sql">[docs]</a><span class="k">def</span> <span class="nf">filters_to_sql</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">default_tables</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="sd">&quot;&quot;&quot;Return filters as SQL syntax</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filters (dict): Nested tree of conditions</span>
+<span class="sd">        default_tables (dict, optional): Association between field names and tables</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: SQL WHERE expression</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; filters_to_sql({&quot;AND&quot;: [(&quot;pos&quot;, &quot;&gt;&quot;, 34), (&quot;af&quot;, &quot;=&quot;, 10)})</span>
+<span class="sd">        &quot;`variants`.`pos` &gt; 34 AND `variants`.`af` = 10&quot;</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        There is a recursive function inside to parse the nested tree of conditions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">is_field</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="k">def</span> <span class="nf">recursive</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">is_field</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+            <span class="c1"># print(&quot;Node to SQL&quot;, node)</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">fields_to_sql</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">],</span> <span class="n">default_tables</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;operator&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s2">&quot;~&quot;</span><span class="p">:</span>
+                <span class="n">operator</span> <span class="o">=</span> <span class="s2">&quot;REGEXP&quot;</span>
+
+            <span class="k">if</span> <span class="n">operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;IN&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT IN&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># node: {&#39;field&#39;: &#39;ref&#39;, &#39;operator&#39;: &#39;IN&#39;, &#39;value&#39;: &quot;(&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;}</span>
+                <span class="c1"># wanted: &quot;ref IN (&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;</span>
+                <span class="c1"># Try to cast string to tuple</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">temp_val</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">temp_val</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># enclose string with quotes</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&#39;</span><span class="si">{value}</span><span class="s2">&#39;&quot;</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="c1"># If value is a WORDSET[&quot;salut&quot;] aka (&#39;WORDSET&#39;, &#39;salut&#39;)</span>
+                <span class="c1"># =&gt; Get SQL statement</span>
+                <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">WORDSET_FUNC_NAME</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">wordset_data_to_sql</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># Remove trailing comma in tuple with 1 element (&quot;xxx&quot;,)</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Strings must be space separated because of operators (IN, etc.)</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># If node is not a field: 1 key only: the logical operator</span>
+        <span class="n">logic_op</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">recursive</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">[</span><span class="n">logic_op</span><span class="p">])</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">sql_filter</span> <span class="k">for</span> <span class="n">sql_filter</span> <span class="ow">in</span> <span class="n">g</span> <span class="k">if</span> <span class="n">sql_filter</span><span class="p">]</span>
+        <span class="c1"># print(&quot;to SQL&quot;, out, &quot;LOGIC&quot;, logic_op)</span>
+        <span class="c1"># Recursive call for each field in the list associated to the</span>
+        <span class="c1"># logical operator.</span>
+        <span class="c1"># node:</span>
+        <span class="c1"># {&#39;AND&#39;: [</span>
+        <span class="c1">#   {&#39;field&#39;: &#39;ref&#39;, &#39;operator&#39;: &#39;IN&#39;, &#39;value&#39;: &quot;(&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;},</span>
+        <span class="c1">#   {&#39;field&#39;: &#39;alt&#39;, &#39;operator&#39;: &#39;IN&#39;, &#39;value&#39;: &quot;(&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;}</span>
+        <span class="c1"># ]}</span>
+        <span class="c1"># Wanted: &quot;ref IN (&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;) AND alt IN (&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;</span>
+        <span class="c1"># to SQL [&quot;ref IN (&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;, &quot;alt IN (&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">out</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="n">f</span><span class="s2">&quot; </span><span class="si">{logic_op}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+
+    <span class="k">return</span> <span class="n">recursive</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="filters_to_vql"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.filters_to_vql">[docs]</a><span class="k">def</span> <span class="nf">filters_to_vql</span><span class="p">(</span><span class="n">filters</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return filters as VQL syntax</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filters (dict): Nested tree of conditions</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: VQL WHERE expression</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">is_field</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+
+    <span class="k">def</span> <span class="nf">recursive</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">node</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">is_field</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+            <span class="c1"># print(&quot;Node to VQL&quot;, node)</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">fields_to_vql</span><span class="p">(</span><span class="n">node</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">])</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="s2">&quot;operator&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">operator</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;IN&quot;</span><span class="p">,</span> <span class="s2">&quot;NOT IN&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># node: {&#39;field&#39;: &#39;ref&#39;, &#39;operator&#39;: &#39;IN&#39;, &#39;value&#39;: &quot;(&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;}</span>
+                <span class="c1"># wanted: &quot;ref IN (&#39;A&#39;, &#39;T&#39;, &#39;G&#39;, &#39;C&#39;)&quot;</span>
+                <span class="c1"># Try to cast string to tuple</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">temp_val</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">temp_val</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;&#39;</span><span class="si">{value}</span><span class="s2">&#39;&quot;</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="c1"># If value is (&#39;WORDSET&#39;, &#39;salut&#39;) aka WORDSET[&quot;salut&quot;]</span>
+                <span class="c1"># =&gt; Get VQL statement</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">WORDSET_FUNC_NAME</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">wordset_data_to_vql</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># Remove trailing comma in tuple with 1 element (&quot;xxx&quot;,)</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Strings must be space separated because of operators (IN, etc.)</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># If node is not a field: 1 key only: the logical operator</span>
+        <span class="n">logic_op</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">recursive</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="p">[</span><span class="n">logic_op</span><span class="p">])</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">sql_filter</span> <span class="k">for</span> <span class="n">sql_filter</span> <span class="ow">in</span> <span class="n">g</span> <span class="k">if</span> <span class="n">sql_filter</span><span class="p">]</span>
+        <span class="c1"># print(&quot;to VQL&quot;, out, &quot;LOGIC&quot;, logic_op)</span>
+        <span class="c1"># {&#39;field&#39;: &#39;chr&#39;, &#39;operator&#39;: &#39;IN&#39;, &#39;value&#39;: (10.0, 11.0)}</span>
+        <span class="c1"># to VQL [&#39;chr IN (10.0, 11.0)&#39;] LOGIC AND</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">out</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s2">&quot;(&quot;</span> <span class="o">+</span> <span class="n">f</span><span class="s2">&quot; </span><span class="si">{logic_op}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+
+    <span class="c1"># Do not return first level of enclosing parenthesis</span>
+    <span class="n">vql_filters</span> <span class="o">=</span> <span class="n">recursive</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">vql_filters</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">vql_filters</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">vql_filters</span></div>
+
+
+<div class="viewcode-block" id="build_vql_query"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.build_vql_query">[docs]</a><span class="k">def</span> <span class="nf">build_vql_query</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;variants&quot;</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="p">{},</span> <span class="n">group_by</span><span class="o">=</span><span class="p">[],</span> <span class="n">having</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="sd">&quot;&quot;&quot;Build VQL SELECT query</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fields (list): List of fields</span>
+<span class="sd">        source (str): source of the virtual table ( see: selection )</span>
+<span class="sd">        filters (dict): nested condition tree</span>
+<span class="sd">        group_by (list/None): list of field you want to group</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;SELECT &quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">fields_to_vql</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; FROM &quot;</span> <span class="o">+</span> <span class="n">source</span>
+    <span class="k">if</span> <span class="n">filters</span><span class="p">:</span>
+        <span class="n">where_clause</span> <span class="o">=</span> <span class="n">filters_to_vql</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">where_clause</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; WHERE &quot;</span> <span class="o">+</span> <span class="n">where_clause</span>
+
+    <span class="k">if</span> <span class="n">group_by</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">+=</span> <span class="s2">&quot; GROUP BY &quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">fields_to_vql</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">group_by</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">having</span><span class="p">:</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">having</span><span class="p">[</span><span class="s2">&quot;op&quot;</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">having</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+            <span class="n">query</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot; HAVING count </span><span class="si">{operator}</span><span class="s2"> </span><span class="si">{value}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="build_sql_query"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.build_sql_query">[docs]</a><span class="k">def</span> <span class="nf">build_sql_query</span><span class="p">(</span>
+    <span class="n">fields</span><span class="p">,</span>
+    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">order_desc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">group_by</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">having</span><span class="o">=</span><span class="p">{},</span>  <span class="c1"># {&quot;op&quot;:&quot;&gt;&quot;, &quot;value&quot;: 3  }</span>
+    <span class="n">default_tables</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">samples_ids</span><span class="o">=</span><span class="p">{},</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build SQL SELECT query</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fields (list): List of fields</span>
+<span class="sd">        source (str): source of the virtual table ( see: selection )</span>
+<span class="sd">        filters (dict): nested condition tree</span>
+<span class="sd">        order_by (str/None): Order by field;</span>
+<span class="sd">            If None, order_desc is not required.</span>
+<span class="sd">        order_desc (bool): Descending or Ascending order</span>
+<span class="sd">        limit (int/None): limit record count;</span>
+<span class="sd">            If None, offset is not required.</span>
+<span class="sd">        offset (int): record count per page</span>
+<span class="sd">        group_by (list/None): list of field you want to group</span>
+<span class="sd">        default_tables (dict): association map between fields and sql table origin</span>
+<span class="sd">        samples_ids (dict): association map between samples name and id</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create fields</span>
+    <span class="n">sql_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;`variants`.`id`&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+        <span class="n">fields_to_sql</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">default_tables</span><span class="p">,</span> <span class="n">use_as</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">fields</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s2">&quot;id&quot;</span>
+    <span class="p">]</span>
+
+    <span class="c1"># if group_by:</span>
+    <span class="c1">#     sql_fields.insert(1, &quot;COUNT() as &#39;count&#39;&quot;)</span>
+
+    <span class="n">sql_query</span> <span class="o">=</span> <span class="n">f</span><span class="s2">&quot;SELECT DISTINCT {&#39;,&#39;.join(sql_fields)} &quot;</span>
+
+    <span class="c1"># #Add child count if grouped</span>
+    <span class="c1"># if grouped:</span>
+    <span class="c1">#     sql_query += &quot;, COUNT(*) as `children`&quot;</span>
+
+    <span class="c1"># Add source table</span>
+    <span class="n">sql_query</span> <span class="o">+=</span> <span class="s2">&quot;FROM variants&quot;</span>
+
+    <span class="c1"># Extract fields from filters</span>
+    <span class="n">fields_in_filters</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">filters_to_flat</span><span class="p">(</span><span class="n">filters</span><span class="p">)}</span>
+
+    <span class="c1"># Loop over fields and check is annotations is required</span>
+    <span class="n">annotation_fields</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">default_tables</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s2">&quot;annotations&quot;</span><span class="p">}</span>
+
+    <span class="n">need_join_annotations</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">sql_fields</span><span class="p">)</span> <span class="o">|</span> <span class="n">fields_in_filters</span><span class="p">:</span>
+        <span class="c1"># Example of field:</span>
+        <span class="c1"># &#39;`annotations`.`gene`&#39;</span>
+        <span class="k">if</span> <span class="s2">&quot;annotations&quot;</span> <span class="ow">in</span> <span class="n">col</span> <span class="ow">or</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">annotation_fields</span><span class="p">:</span>
+            <span class="n">need_join_annotations</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">need_join_annotations</span><span class="p">:</span>
+        <span class="n">sql_query</span> <span class="o">+=</span> <span class="s2">&quot; LEFT JOIN annotations ON annotations.variant_id = variants.id&quot;</span>
+
+    <span class="c1"># Add Join Selection</span>
+    <span class="c1"># TODO: set variants as global variables</span>
+    <span class="k">if</span> <span class="n">source</span> <span class="o">!=</span> <span class="s2">&quot;variants&quot;</span><span class="p">:</span>
+        <span class="n">sql_query</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="s2">&quot; INNER JOIN selection_has_variant sv ON sv.variant_id = variants.id &quot;</span>
+            <span class="n">f</span><span class="s2">&quot;INNER JOIN selections s ON s.id = sv.selection_id AND s.name = &#39;</span><span class="si">{source}</span><span class="s2">&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Add Join Samples</span>
+    <span class="c1">## detect if fields contains function like (genotype,boby,gt) and save boby</span>
+    <span class="n">all_fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">fields_in_filters</span><span class="p">)</span>
+    <span class="n">all_fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">all_fields</span><span class="p">:</span>
+        <span class="c1"># if column looks like  &quot;genotype.tumor.gt&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">GENOTYPE_FUNC_NAME</span><span class="p">:</span>
+                <span class="n">sample_name</span> <span class="o">=</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample_name</span><span class="p">)</span>
+
+    <span class="c1"># make samples uniques</span>
+    <span class="n">samples</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+
+    <span class="c1">## Create Sample Join</span>
+    <span class="k">for</span> <span class="n">sample_name</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+        <span class="c1"># Optimisation ?</span>
+        <span class="c1"># sample_id = self.cache_samples_ids[sample_name]</span>
+        <span class="k">if</span> <span class="n">sample_name</span> <span class="ow">in</span> <span class="n">samples_ids</span><span class="p">:</span>
+            <span class="n">sample_id</span> <span class="o">=</span> <span class="n">samples_ids</span><span class="p">[</span><span class="n">sample_name</span><span class="p">]</span>
+            <span class="n">sql_query</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot;&quot;&quot; INNER JOIN sample_has_variant `</span><span class="si">{GENOTYPE_FUNC_NAME}</span><span class="s2">_</span><span class="si">{sample_name}</span><span class="s2">` ON `</span><span class="si">{GENOTYPE_FUNC_NAME}</span><span class="s2">_</span><span class="si">{sample_name}</span><span class="s2">`.variant_id = variants.id AND `</span><span class="si">{GENOTYPE_FUNC_NAME}</span><span class="s2">_</span><span class="si">{sample_name}</span><span class="s2">`.sample_id = </span><span class="si">{sample_id}</span><span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="c1"># Add Where Clause</span>
+    <span class="k">if</span> <span class="n">filters</span><span class="p">:</span>
+        <span class="n">where_clause</span> <span class="o">=</span> <span class="n">filters_to_sql</span><span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">default_tables</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">where_clause</span><span class="p">:</span>
+            <span class="n">sql_query</span> <span class="o">+=</span> <span class="s2">&quot; WHERE &quot;</span> <span class="o">+</span> <span class="n">where_clause</span>
+
+    <span class="c1"># Add Group By</span>
+    <span class="k">if</span> <span class="n">group_by</span><span class="p">:</span>
+        <span class="n">sql_query</span> <span class="o">+=</span> <span class="s2">&quot; GROUP BY &quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">fields_to_sql</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">default_tables</span><span class="p">,</span> <span class="n">use_as</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">group_by</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">having</span><span class="p">:</span>
+            <span class="n">operator</span> <span class="o">=</span> <span class="n">having</span><span class="p">[</span><span class="s2">&quot;op&quot;</span><span class="p">]</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">having</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span>
+            <span class="n">sql_query</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot; HAVING count </span><span class="si">{operator}</span><span class="s2"> </span><span class="si">{val}</span><span class="s2">&quot;</span>
+
+    <span class="c1"># Add Order By</span>
+    <span class="k">if</span> <span class="n">order_by</span><span class="p">:</span>
+        <span class="c1"># TODO : sqlite escape field with quote</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="s2">&quot;DESC&quot;</span> <span class="k">if</span> <span class="n">order_desc</span> <span class="k">else</span> <span class="s2">&quot;ASC&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUGH&quot;</span><span class="p">,</span> <span class="n">order_by</span><span class="p">)</span>
+        <span class="n">order_by</span> <span class="o">=</span> <span class="n">fields_to_sql</span><span class="p">(</span><span class="n">order_by</span><span class="p">,</span> <span class="n">default_tables</span><span class="p">)</span>
+        <span class="n">sql_query</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot; ORDER BY </span><span class="si">{order_by}</span><span class="s2"> </span><span class="si">{orientation}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">limit</span><span class="p">:</span>
+        <span class="n">sql_query</span> <span class="o">+=</span> <span class="n">f</span><span class="s2">&quot; LIMIT </span><span class="si">{limit}</span><span class="s2"> OFFSET </span><span class="si">{offset}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">sql_query</span></div>
+
+
+<div class="viewcode-block" id="build_full_sql_query"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.build_full_sql_query">[docs]</a><span class="k">def</span> <span class="nf">build_full_sql_query</span><span class="p">(</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;alt&quot;</span><span class="p">],</span>
+    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+    <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">order_desc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">group_by</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">having</span><span class="o">=</span><span class="p">{},</span>  <span class="c1"># {&quot;op&quot;:&quot;&gt;&quot;, &quot;value&quot;: 3  }</span>
+    <span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build a complete SQL SELECT statement according to the data loaded from DB</span>
+
+<span class="sd">    You don&#39;t have to give the association map between fields and sql table origin</span>
+<span class="sd">    nor the association map between samples name and id.</span>
+<span class="sd">    In exchange SQL connection is mandatory.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): SQL connection</span>
+<span class="sd">        fields (list): List of fields</span>
+<span class="sd">        source (str): source of the virtual table ( see: selection )</span>
+<span class="sd">        filters (dict): nested condition tree</span>
+<span class="sd">        order_by (str/None): Order by field;</span>
+<span class="sd">            If None, order_desc is not required.</span>
+<span class="sd">        order_desc (bool): Descending or Ascending order</span>
+<span class="sd">        limit (int/None): limit record count;</span>
+<span class="sd">            If None, offset is not required.</span>
+<span class="sd">        offset (int): record count per page</span>
+<span class="sd">        group_by (list/None): list of field you want to group</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Used cached data</span>
+    <span class="n">default_tables</span><span class="p">,</span> <span class="n">sample_ids</span> <span class="o">=</span> <span class="n">get_default_tables_and_sample_ids</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+    <span class="c1"># LOGGER.debug(get_default_tables_and_sample_ids.cache_info())</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="n">build_sql_query</span><span class="p">(</span>
+        <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+        <span class="n">order_by</span><span class="o">=</span><span class="n">order_by</span><span class="p">,</span>
+        <span class="n">order_desc</span><span class="o">=</span><span class="n">order_desc</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+        <span class="n">group_by</span><span class="o">=</span><span class="n">group_by</span><span class="p">,</span>
+        <span class="n">having</span><span class="o">=</span><span class="n">having</span><span class="p">,</span>
+        <span class="n">default_tables</span><span class="o">=</span><span class="n">default_tables</span><span class="p">,</span>
+        <span class="n">samples_ids</span><span class="o">=</span><span class="n">sample_ids</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="get_default_tables_and_sample_ids"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.querybuilder.get_default_tables_and_sample_ids">[docs]</a><span class="nd">@lru_cache</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">get_default_tables_and_sample_ids</span><span class="p">(</span><span class="n">conn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Handy function to cache default_tables and sample_ids from database</span>
+
+<span class="sd">    This function is used for every queries built in :meth:`build_full_sql_query`</span>
+
+<span class="sd">    Warnings:</span>
+<span class="sd">        Do not forget to clear this cache when samples are added in DB via</span>
+<span class="sd">        a PED file for example.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get {&#39;favorite&#39;: &#39;variants&#39;, &#39;comment&#39;: &#39;variants&#39;, impact&#39;: &#39;annotations&#39;, ...}</span>
+    <span class="n">default_tables</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]:</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_fields</span><span class="p">(</span><span class="n">conn</span><span class="p">)}</span>
+    <span class="c1"># Get {&#39;NORMAL&#39;: 1, &#39;TUMOR&#39;: 2}</span>
+    <span class="n">sample_ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]:</span> <span class="n">i</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">conn</span><span class="p">)}</span>
+
+    <span class="k">return</span> <span class="n">default_tables</span><span class="p">,</span> <span class="n">sample_ids</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

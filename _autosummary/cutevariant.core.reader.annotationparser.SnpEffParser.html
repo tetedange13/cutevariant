@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.annotationparser.SnpEffParser &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../index.html"/>
+        <link rel="up" title="cutevariant.core.reader.annotationparser" href="cutevariant.core.reader.annotationparser.html"/>
+        <link rel="next" title="cutevariant.core.reader.annotationparser.VepParser" href="cutevariant.core.reader.annotationparser.VepParser.html"/>
+        <link rel="prev" title="cutevariant.core.reader.annotationparser.BaseParser" href="cutevariant.core.reader.annotationparser.BaseParser.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev_documentation.html">Documentation for developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../core_api.html">Core API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html">Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html#module-cutevariant.core.vql">VQL language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importers.html">Project importer</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../readers.html">Readers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../readers.html#module-cutevariant.core.readerfactory">Factory</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../readers.html#id1">Readers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../writers.html">Writers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev_documentation.html">Documentation for developers</a> &raquo;</li>
+        
+          <li><a href="../core_api.html">Core API</a> &raquo;</li>
+        
+          <li><a href="../readers.html">Readers</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.html">cutevariant.core.reader</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.annotationparser.html">cutevariant.core.reader.annotationparser</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.annotationparser.SnpEffParser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/cutevariant.core.reader.annotationparser.SnpEffParser.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cutevariant-core-reader-annotationparser-snpeffparser">
+<h1>cutevariant.core.reader.annotationparser.SnpEffParser<a class="headerlink" href="#cutevariant-core-reader-annotationparser-snpeffparser" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="cutevariant.core.reader.annotationparser.SnpEffParser">
+<em class="property">class </em><code class="sig-prename descclassname">cutevariant.core.reader.annotationparser.</code><code class="sig-name descname">SnpEffParser</code><a class="reference internal" href="../_modules/cutevariant/core/reader/annotationparser.html#SnpEffParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.annotationparser.SnpEffParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="cutevariant.core.reader.annotationparser.BaseParser.html#cutevariant.core.reader.annotationparser.BaseParser" title="cutevariant.core.reader.annotationparser.BaseParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">cutevariant.core.reader.annotationparser.BaseParser</span></code></a></p>
+<p>Parser for SnpEFF annotations</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We assume that the description field looks like this:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>INFO=&lt;ID=ANN,Number=.,Type=String,Description=&quot;Functional annotations: &#39;Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length |CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO&#39; &quot;&gt;
+</pre></div>
+</div>
+</div>
+<dl class="py method">
+<dt id="cutevariant.core.reader.annotationparser.SnpEffParser.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/annotationparser.html#SnpEffParser.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.annotationparser.SnpEffParser.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.annotationparser.SnpEffParser.__init__" title="cutevariant.core.reader.annotationparser.SnpEffParser.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>()</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">handle_annotations</span></code>(annotation_key_name, variant)</p></td>
+<td><p>Remove the given key from the variant dict, add “annotations” key with the list of annotations into the variant dict.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">handle_descriptions</span></code>(raw_fields)</p></td>
+<td><p>Construct annotation_field_name with the fields of the file, and yield fields (dictionnaries) with the full description of fields of the file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.annotationparser.SnpEffParser.parse_fields" title="cutevariant.core.reader.annotationparser.SnpEffParser.parse_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_fields</span></code></a>(fields)</p></td>
+<td><p>Generate fields description</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.annotationparser.SnpEffParser.parse_variants" title="cutevariant.core.reader.annotationparser.SnpEffParser.parse_variants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_variants</span></code></a>(variants)</p></td>
+<td><p>Generate variants data</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="cutevariant.core.reader.annotationparser.SnpEffParser.parse_fields">
+<code class="sig-name descname">parse_fields</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fields</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/annotationparser.html#SnpEffParser.parse_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.annotationparser.SnpEffParser.parse_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate fields description</p>
+<p>Called by a reader when its get_fields() method is called and when
+an annotation parser is set.</p>
+<p>This function parses special annotation field “ann”/”ANN”,
+other fields are yielded without being affected.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_descriptions()</span></code></p>
+</div>
+<p>Input example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">({</span>
+<span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;generic_field1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">},</span>
+<span class="p">{</span>
+<span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;ann&#39;</span><span class="p">,</span>
+<span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;... annotation_field_name1 | annotation_field_name2 ...&#39;</span><span class="p">,</span>
+<span class="o">...</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>Output example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">({</span>
+<span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;generic_field1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">},</span>
+<span class="p">{</span>
+<span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;annotation_field_name1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">},</span>
+<span class="p">{</span>
+<span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;annotation_field_name2&#39;</span><span class="p">,</span>
+<span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;category&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Names of fields are changed to lowercase.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fields</strong> (<em>&lt;generator &lt;dict&gt;&gt;</em>) – Generator of fields.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generator of full fields descriptions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>&lt;generator &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.annotationparser.SnpEffParser.parse_variants">
+<code class="sig-name descname">parse_variants</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">variants</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/annotationparser.html#SnpEffParser.parse_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.annotationparser.SnpEffParser.parse_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate variants data</p>
+<p>This function removes the key “ann” from the variants,
+and add “annotations” key with the list of annotations.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">handle_annotations()</span></code></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>variants</strong> (<em>&lt;generator &lt;dict&gt;&gt;</em>) – Generator of variants.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generator of full variants with “annotations” key.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>&lt;generator &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cutevariant.core.reader.annotationparser.VepParser.html" class="btn btn-neutral float-right" title="cutevariant.core.reader.annotationparser.VepParser" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cutevariant.core.reader.annotationparser.BaseParser.html" class="btn btn-neutral" title="cutevariant.core.reader.annotationparser.BaseParser" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

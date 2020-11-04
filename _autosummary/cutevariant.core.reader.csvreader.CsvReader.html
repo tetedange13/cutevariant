@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.csvreader.CsvReader &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../index.html"/>
+        <link rel="up" title="cutevariant.core.reader.csvreader" href="cutevariant.core.reader.csvreader.html"/>
+        <link rel="next" title="cutevariant.core.reader.fakereader" href="cutevariant.core.reader.fakereader.html"/>
+        <link rel="prev" title="cutevariant.core.reader.csvreader" href="cutevariant.core.reader.csvreader.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev_documentation.html">Documentation for developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../core_api.html">Core API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html">Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html#module-cutevariant.core.vql">VQL language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importers.html">Project importer</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../readers.html">Readers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../readers.html#module-cutevariant.core.readerfactory">Factory</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../readers.html#id1">Readers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../writers.html">Writers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev_documentation.html">Documentation for developers</a> &raquo;</li>
+        
+          <li><a href="../core_api.html">Core API</a> &raquo;</li>
+        
+          <li><a href="../readers.html">Readers</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.html">cutevariant.core.reader</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.csvreader.html">cutevariant.core.reader.csvreader</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.csvreader.CsvReader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/cutevariant.core.reader.csvreader.CsvReader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cutevariant-core-reader-csvreader-csvreader">
+<h1>cutevariant.core.reader.csvreader.CsvReader<a class="headerlink" href="#cutevariant-core-reader-csvreader-csvreader" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="cutevariant.core.reader.csvreader.CsvReader">
+<em class="property">class </em><code class="sig-prename descclassname">cutevariant.core.reader.csvreader.</code><code class="sig-name descname">CsvReader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="cutevariant.core.reader.abstractreader.AbstractReader.html#cutevariant.core.reader.abstractreader.AbstractReader" title="cutevariant.core.reader.abstractreader.AbstractReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">cutevariant.core.reader.abstractreader.AbstractReader</span></code></a></p>
+<p>VEP parser to extract data from CSV file</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>AbstractReader class for more information.</p>
+</div>
+<p>About VEP file format:</p>
+<p><a class="reference external" href="http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick">http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick</a></p>
+<p>If a variant overlaps a gene with multiple alternate splicing variants
+(transcripts), then a block of annotation for each of these transcripts
+is reported in the output. In the default VEP output format each of these
+blocks is written on a single line of output; in VCF output format the
+blocks are separated by commas in the INFO field.</p>
+<p>Example of annotation block (1 line):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#Uploaded_variation   Location   Allele   Consequence   IMPACT</span>
+<span class="n">SYMBOL</span>   <span class="n">Gene</span>   <span class="n">Feature_type</span>   <span class="n">Feature</span>   <span class="n">BIOTYPE</span>   <span class="n">EXON</span>   <span class="n">INTRON</span>   <span class="n">HGVSc</span>
+<span class="n">HGVSp</span>   <span class="n">cDNA_position</span>   <span class="n">CDS_position</span>   <span class="n">Protein_position</span>
+<span class="n">Amino_acids</span>   <span class="n">Codons</span>   <span class="n">Existing_variation</span>   <span class="n">DISTANCE</span>
+<span class="n">STRAND</span>   <span class="n">FLAGS</span>   <span class="n">SYMBOL_SOURCE</span>   <span class="n">HGNC_ID</span>   <span class="n">TSL</span>   <span class="n">APPRIS</span>
+<span class="n">REFSEQ_MATCHGIVEN_REF</span>   <span class="n">USED_REF</span>   <span class="n">BAM_EDIT</span>
+<span class="n">SIFT</span>   <span class="n">PolyPhen</span>   <span class="n">AF</span>   <span class="n">CLIN_SIG</span>   <span class="n">SOMATIC</span>   <span class="n">PHENO</span>
+<span class="n">PUBMED</span>   <span class="n">MOTIF_NAME</span>   <span class="n">MOTIF_POS</span>   <span class="n">HIGH_INF_POS</span>   <span class="n">MOTIF_SCORE_CHANGE</span>
+<span class="n">LRT_pred</span>   <span class="n">LRT_score</span>   <span class="n">MutationTaster_model</span>   <span class="n">MutationTaster_pred</span>
+<span class="n">SIFT_pred</span>   <span class="n">SIFT_score</span>   <span class="n">clinvar_clnsig</span>   <span class="n">clinvar_rs</span>   <span class="n">clinvar_trait</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="cutevariant.core.reader.csvreader.CsvReader.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.__init__" title="cutevariant.core.reader.csvreader.CsvReader.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(device)</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_number_lines</span></code>()</p></td>
+<td><p>Get a sample of lines in file if possible and if the end of file is not reached compute an evaluation of the global number of lines.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_fields</span></code>()</p></td>
+<td><p>Yield fields with extra mandatory fields like ‘comment’ and ‘score’</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_fields_by_category</span></code>(category)</p></td>
+<td><p>Syntaxic suggar to get fields according their category</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_variants</span></code>(**kwargs)</p></td>
+<td><p>Yield variants with extra information computed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.get_fields" title="cutevariant.core.reader.csvreader.CsvReader.get_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fields</span></code></a>()</p></td>
+<td><p>Get full fields descriptions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fields_by_category</span></code>(category)</p></td>
+<td><p>Syntaxic suggar to get fields according their category</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadatas</span></code>()</p></td>
+<td><p>Get meta data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.get_samples" title="cutevariant.core.reader.csvreader.CsvReader.get_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_samples</span></code></a>()</p></td>
+<td><p>Return samples (individual/family data) of the file (empty list for this reader)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_total_file_size</span></code>()</p></td>
+<td><p>Compute file size int bytes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.get_variants" title="cutevariant.core.reader.csvreader.CsvReader.get_variants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_variants</span></code></a>()</p></td>
+<td><p>Get variants as an iterable of dictionnaries</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_variants_count</span></code>()</p></td>
+<td><p>Get variant count from the device</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.location_to_chr_pos" title="cutevariant.core.reader.csvreader.CsvReader.location_to_chr_pos"><code class="xref py py-obj docutils literal notranslate"><span class="pre">location_to_chr_pos</span></code></a>(location)</p></td>
+<td><p>Parse VEP <cite>Location</cite> field to extract <cite>chr</cite>, <cite>pos</cite> fields</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.parse_fields" title="cutevariant.core.reader.csvreader.CsvReader.parse_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_fields</span></code></a>()</p></td>
+<td><p>See <a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.get_fields" title="cutevariant.core.reader.csvreader.CsvReader.get_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_fields()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.parse_variants" title="cutevariant.core.reader.csvreader.CsvReader.parse_variants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_variants</span></code></a>()</p></td>
+<td><p>Read file and parse variants</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="cutevariant.core.reader.csvreader.CsvReader.get_fields">
+<code class="sig-name descname">get_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader.get_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader.get_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get full fields descriptions</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Annotations fields are added here if they exist in the file.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.parse_fields" title="cutevariant.core.reader.csvreader.CsvReader.parse_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_fields()</span></code></a> for basic default fields.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Tuple of fields.
+Each field is a dict with the following keys:
+<cite>name, category, description, type</cite>.
+Some fields have an additional constraint key when they are destined
+to be a primary key in the database.
+Annotations fields are added here if they exist in the file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;tuple &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.csvreader.CsvReader.get_samples">
+<code class="sig-name descname">get_samples</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader.get_samples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader.get_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return samples (individual/family data) of the file (empty list for this reader)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.csvreader.CsvReader.get_variants">
+<code class="sig-name descname">get_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader.get_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader.get_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get variants as an iterable of dictionnaries</p>
+<p>“annotations” key is added here with the list of annotations if
+they exist in the file.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>parse_variant()</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Generator of full variants with “annotations” key.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;generator &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.csvreader.CsvReader.location_to_chr_pos">
+<code class="sig-name descname">location_to_chr_pos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">location</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader.location_to_chr_pos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader.location_to_chr_pos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse VEP <cite>Location</cite> field to extract <cite>chr</cite>, <cite>pos</cite> fields</p>
+<dl class="simple">
+<dt>2 representations can be encountered in standard coordinate format</dt><dd><ul class="simple">
+<li><p>chr:start</p></li>
+<li><p>chr:start-end</p></li>
+</ul>
+</dd>
+</dl>
+<p>The start position is always returned as <cite>pos</cite> value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Example</dt>
+<dd class="field-odd"><p>11:10000-10000 =&gt; chr, pos =&gt; 11, 10000</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><p><strong>location</strong> – Location field in a VEP file.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Tuple of chr and pos data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;tuple &lt;str&gt;, &lt;str&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.csvreader.CsvReader.parse_fields">
+<code class="sig-name descname">parse_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader.parse_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader.parse_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#cutevariant.core.reader.csvreader.CsvReader.get_fields" title="cutevariant.core.reader.csvreader.CsvReader.get_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_fields()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.csvreader.CsvReader.parse_variants">
+<code class="sig-name descname">parse_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/csvreader.html#CsvReader.parse_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.csvreader.CsvReader.parse_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read file and parse variants</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Each line is a transcript; there are many transcripts per variant.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Generator of variants.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;generator &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cutevariant.core.reader.fakereader.html" class="btn btn-neutral float-right" title="cutevariant.core.reader.fakereader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cutevariant.core.reader.csvreader.html" class="btn btn-neutral" title="cutevariant.core.reader.csvreader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

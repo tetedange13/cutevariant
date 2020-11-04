@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.vcfreader.VcfReader &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../index.html"/>
+        <link rel="up" title="cutevariant.core.reader.vcfreader" href="cutevariant.core.reader.vcfreader.html"/>
+        <link rel="next" title="Writers" href="../writers.html"/>
+        <link rel="prev" title="cutevariant.core.reader.vcfreader" href="cutevariant.core.reader.vcfreader.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev_documentation.html">Documentation for developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../core_api.html">Core API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html">Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html#module-cutevariant.core.vql">VQL language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importers.html">Project importer</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../readers.html">Readers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../readers.html#module-cutevariant.core.readerfactory">Factory</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../readers.html#id1">Readers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../writers.html">Writers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev_documentation.html">Documentation for developers</a> &raquo;</li>
+        
+          <li><a href="../core_api.html">Core API</a> &raquo;</li>
+        
+          <li><a href="../readers.html">Readers</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.html">cutevariant.core.reader</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.vcfreader.html">cutevariant.core.reader.vcfreader</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.vcfreader.VcfReader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/cutevariant.core.reader.vcfreader.VcfReader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cutevariant-core-reader-vcfreader-vcfreader">
+<h1>cutevariant.core.reader.vcfreader.VcfReader<a class="headerlink" href="#cutevariant-core-reader-vcfreader-vcfreader" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader">
+<em class="property">class </em><code class="sig-prename descclassname">cutevariant.core.reader.vcfreader.</code><code class="sig-name descname">VcfReader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">annotation_parser</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="cutevariant.core.reader.abstractreader.AbstractReader.html#cutevariant.core.reader.abstractreader.AbstractReader" title="cutevariant.core.reader.abstractreader.AbstractReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">cutevariant.core.reader.abstractreader.AbstractReader</span></code></a></p>
+<p>VCF parser to extract data from vcf file</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>AbstractReader class for more information.</p>
+</div>
+<dl class="py attribute">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.annotation_parser">
+<code class="sig-name descname">annotation_parser</code><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.annotation_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Support “VepParser()” and “SnpeffParser()”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">device</span></em>, <em class="sig-param"><span class="n">annotation_parser</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a VCF Reader</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Number of lines <cite>number_lines</cite> AND <cite>file_size</cite> is computed in
+AbstractReader class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>device</strong> – File device handler returned by open.</p>
+</dd>
+<dt class="field-even">Key annotation_parser (str)</dt>
+<dd class="field-even"><p>“vep” or “snpeff”
+This argument forces the reader to use a specific parser for
+the annotations. By default it’s None: no parser will be used,
+annotations will not be taken into account.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.__init__" title="cutevariant.core.reader.vcfreader.VcfReader.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(device[, annotation_parser])</p></td>
+<td><p>Construct a VCF Reader</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_number_lines</span></code>()</p></td>
+<td><p>Get a sample of lines in file if possible and if the end of file is not reached compute an evaluation of the global number of lines.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_fields</span></code>()</p></td>
+<td><p>Yield fields with extra mandatory fields like ‘comment’ and ‘score’</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_fields_by_category</span></code>(category)</p></td>
+<td><p>Syntaxic suggar to get fields according their category</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_extra_variants</span></code>(**kwargs)</p></td>
+<td><p>Yield variants with extra information computed.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.get_fields" title="cutevariant.core.reader.vcfreader.VcfReader.get_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fields</span></code></a>()</p></td>
+<td><p>Get full fields descriptions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_fields_by_category</span></code>(category)</p></td>
+<td><p>Syntaxic suggar to get fields according their category</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.get_metadatas" title="cutevariant.core.reader.vcfreader.VcfReader.get_metadatas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadatas</span></code></a>()</p></td>
+<td><p>override from AbstractReader</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.get_samples" title="cutevariant.core.reader.vcfreader.VcfReader.get_samples"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_samples</span></code></a>()</p></td>
+<td><p>Return list of samples (individual ids).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_total_file_size</span></code>()</p></td>
+<td><p>Compute file size int bytes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.get_variants" title="cutevariant.core.reader.vcfreader.VcfReader.get_variants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_variants</span></code></a>()</p></td>
+<td><p>Get variants as an iterable of dictionnaries</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_variants_count</span></code>()</p></td>
+<td><p>Get variant count from the device</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.parse_fields" title="cutevariant.core.reader.vcfreader.VcfReader.parse_fields"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_fields</span></code></a>()</p></td>
+<td><p>Extract fields informations from VCF fields</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.parse_variants" title="cutevariant.core.reader.vcfreader.VcfReader.parse_variants"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_variants</span></code></a>()</p></td>
+<td><p>Read file and parse variants</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.get_fields">
+<code class="sig-name descname">get_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader.get_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.get_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get full fields descriptions</p>
+<p>This function is called a first time before variants insertion.</p>
+<p>Annotations fields are added here if they exist in the file.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#cutevariant.core.reader.vcfreader.VcfReader.parse_fields" title="cutevariant.core.reader.vcfreader.VcfReader.parse_fields"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_fields()</span></code></a> for basic default fields.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Tuple of fields.
+Each field is a dict with the following keys:
+<cite>name, category, description, type</cite>.
+Some fields have an additional constraint key when they are destined
+to be a primary key in the database.
+Annotations fields are added here if they exist in the file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;tuple &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.get_metadatas">
+<code class="sig-name descname">get_metadatas</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader.get_metadatas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.get_metadatas" title="Permalink to this definition">¶</a></dt>
+<dd><p>override from AbstractReader</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.get_samples">
+<code class="sig-name descname">get_samples</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader.get_samples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.get_samples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of samples (individual ids).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.get_variants">
+<code class="sig-name descname">get_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader.get_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.get_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get variants as an iterable of dictionnaries</p>
+<p>“annotations” key is added here with the list of annotations if
+they exist in the file.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>parse_variants()</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Generator of full variants with “annotations” key.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;generator &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.parse_fields">
+<code class="sig-name descname">parse_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader.parse_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.parse_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract fields informations from VCF fields</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Fields used in PRIMARY KEYS have the constraint NOT NULL.
+By default, all other fields can have NULL values.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Generator of fields.
+Each field is a dict with the following keys:
+<cite>name, category, description, type</cite>.
+Some fields have an additional constraint key when they are destined
+to be a primary key in the database.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;generator &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="cutevariant.core.reader.vcfreader.VcfReader.parse_variants">
+<code class="sig-name descname">parse_variants</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/vcfreader.html#VcfReader.parse_variants"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.vcfreader.VcfReader.parse_variants" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read file and parse variants</p>
+<p>1 variant is created for each alternative allele detected for each record.
+For each variant we add the corresponding genotype of each sample under
+the key “samples”.</p>
+<p class="rubric">Examples</p>
+<p>For a record: <cite>“REF”: “A”, “ALT”: [“T”, “C”]</cite> with 2 samples with the
+following genotypes: 0/0 and 0/1 (ref/ref and ref/alt).
+We create 2 variants (because of the 2 alternative alleles),
+each with 2 samples with the following genotypes: 0 and 1.</p>
+<p>Where homozygous_ref = 0, heterozygous = 1, homozygous_alt = 2.</p>
+<p>We don’t track which alternative allele is in the genotype of the
+sample.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://pyvcf.readthedocs.io/en/v0.4.6/INTRO.html">https://pyvcf.readthedocs.io/en/v0.4.6/INTRO.html</a>
+<a class="reference external" href="https://pyvcf.readthedocs.io/en/latest/API.html#vcf.model._Call.gt_type">https://pyvcf.readthedocs.io/en/latest/API.html#vcf.model._Call.gt_type</a></p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="cutevariant.core.reader.abstractreader.AbstractReader.html#cutevariant.core.reader.abstractreader.AbstractReader.get_extra_variants" title="cutevariant.core.reader.abstractreader.AbstractReader.get_extra_variants"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cutevariant.core.reader.abstractreader.AbstractReader.get_extra_variants()</span></code></a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Generator of variants.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;generator &lt;dict&gt;&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../writers.html" class="btn btn-neutral float-right" title="Writers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cutevariant.core.reader.vcfreader.html" class="btn btn-neutral" title="cutevariant.core.reader.vcfreader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

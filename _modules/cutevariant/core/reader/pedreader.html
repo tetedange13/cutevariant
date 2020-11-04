@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.pedreader &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.pedreader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.reader.pedreader</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+
+<span class="kn">import</span> <span class="nn">cutevariant.commons</span> <span class="k">as</span> <span class="nn">cm</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">logger</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="PedReader"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.pedreader.PedReader.html#cutevariant.core.reader.pedreader.PedReader">[docs]</a><span class="k">class</span> <span class="nc">PedReader</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;PED \*.tfam file (PLINK sample information file) parser</span>
+
+<span class="sd">    Data has the same structure of a tfam file object</span>
+<span class="sd">    https://www.cog-genomics.org/plink/1.9/formats#fam</span>
+<span class="sd">    http://zzz.bwh.harvard.edu/plink/data.shtml</span>
+
+<span class="sd">    Format description:</span>
+<span class="sd">        A tabular/white space separated text file with no header line, and one</span>
+<span class="sd">        line per sample with the following six fields:</span>
+
+<span class="sd">        - Family ID (str): (&#39;FID&#39;); ex: &quot;Valse&quot;</span>
+<span class="sd">        - Within-family ID (str): (&#39;IID&#39;; cannot be &#39;0&#39;); ex: &quot;Emmanuel&quot;</span>
+<span class="sd">        - Within-family ID of father (str): (&#39;0&#39; if father isn&#39;t in dataset)</span>
+<span class="sd">        - Within-family ID of mother (str): (&#39;0&#39; if mother isn&#39;t in dataset)</span>
+<span class="sd">        - Sex code (int): (&#39;1&#39; = male, &#39;2&#39; = female, &#39;0&#39; or other = unknown)</span>
+<span class="sd">        - Phenotype value (int): (&#39;1&#39; = control, &#39;2&#39; = case, &#39;-9&#39;/&#39;0&#39;/non-numeric = missing data if case/control)</span>
+<span class="sd">            We expect &#39;0&#39; for this last one.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        Comments are lines starting with a # character.</span>
+<span class="sd">        The rest of that line will be ignored.</span>
+
+<span class="sd">    Recall, DB structure:</span>
+<span class="sd">        - id INTEGER PRIMARY KEY ASC,</span>
+<span class="sd">        - name TEXT,</span>
+<span class="sd">        - family_id TEXT DEFAULT &#39;fam&#39;,</span>
+<span class="sd">        - father_id INTEGER DEFAULT 0,</span>
+<span class="sd">        - mother_id INTEGER DEFAULT 0,</span>
+<span class="sd">        - sex INTEGER DEFAULT 0,</span>
+<span class="sd">        - phenotype INTEGER DEFAULT 0</span>
+
+<span class="sd">    TODO:</span>
+<span class="sd">        Detect if an individual has unknown sex but appears in mother_id or</span>
+<span class="sd">        father_id of a family.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PedReader.__init__"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.pedreader.PedReader.html#cutevariant.core.reader.pedreader.PedReader.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">samples</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">raw_samples</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): PED filepath</span>
+<span class="sd">            samples (dict): Database current samples. Each key is a field</span>
+<span class="sd">                of the table named &quot;samples&quot;. We use this dict to apply unicity</span>
+<span class="sd">                constraints over family_id vs individual_id, father_id and</span>
+<span class="sd">                mother_id.</span>
+<span class="sd">                Must be not empty if `raw_samples` is `False`.</span>
+<span class="sd">            raw_samples (boolean):</span>
+<span class="sd">                - If raw_samples are activated (default), samples are lists of fields.</span>
+<span class="sd">                - If raw_samples are not activated, samples are dict of fields</span>
+<span class="sd">                  ready to be inserted in the database according to the given samples.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">samples</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">raw_samples</span><span class="p">)</span> <span class="ow">or</span> <span class="n">raw_samples</span><span class="p">,</span> \
+            <span class="s2">&quot;If raw_samples are deactivated, database samples must be given&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filepath</span> <span class="o">=</span> <span class="n">filepath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">samples</span> <span class="o">=</span> <span class="n">samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_samples</span> <span class="o">=</span> <span class="n">raw_samples</span></div>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generator on PED file</span>
+
+<span class="sd">        PED file is opened as a tabulated or white space separated file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+            <span class="c1"># Sniff dialect of CSV file</span>
+            <span class="n">dialect</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">10000</span><span class="p">),</span> <span class="n">delimiters</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2"> &quot;</span><span class="p">)</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">stream</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">row</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)),</span>  <span class="c1"># Remove comments</span>
+                <span class="n">dialect</span>
+            <span class="p">)</span>
+
+            <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_samples</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PedReader.get_samples"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.pedreader.PedReader.html#cutevariant.core.reader.pedreader.PedReader.get_samples">[docs]</a>    <span class="k">def</span> <span class="nf">get_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Yield samples from PED file</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            The following problems with samples are detected:</span>
+<span class="sd">                - Not digit sex/phenotype: Exception raised</span>
+<span class="sd">                - Sex/phenotype not expected (0,1,2): Individual skipped</span>
+<span class="sd">                - Unknown individual_id: Individual skipped</span>
+<span class="sd">                - If samples are given, not found family_id, individual_id couple:</span>
+<span class="sd">                  Individual skipped.</span>
+<span class="sd">                  i.e.: And individual not already in DB is skipped.</span>
+<span class="sd">                - If samples are given, not found family_id, father_id/mother_id:</span>
+<span class="sd">                  Added as unknown.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (generator[dict/list]): Generator of samples.</span>
+<span class="sd">                - If raw_samples are activated (default), samples are lists of fields.</span>
+<span class="sd">                - If raw_samples are not activated, samples are dict of fields</span>
+<span class="sd">                  ready to be inserted in the database according to the given samples.</span>
+
+<span class="sd">            Example::</span>
+
+<span class="sd">                `[family_id, individual_id, father_id, mother_id, sex, phenotype]`</span>
+<span class="sd">                Or</span>
+<span class="sd">                `[&quot;id&quot;: _, &quot;family_id&quot;: _, &quot;father_id&quot;: _, &quot;mother_id&quot;: _, &quot;sex&quot;: _, &quot;phenotype&quot;: ]`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">samples_mapping</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="p">(</span><span class="n">sample</span><span class="p">[</span><span class="s2">&quot;family_id&quot;</span><span class="p">],</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]):</span> <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">6</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;PED file conformity line &lt;</span><span class="si">%s</span><span class="s2">&gt;; too few fields; expected at least 6&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Extract and validate data</span>
+            <span class="n">family_id</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">individual_id</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">father_id</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">mother_id</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">sex</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">phenotype</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">sex</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;PED file conformity line &lt;</span><span class="si">%s</span><span class="s2">&gt;; sex code &lt;</span><span class="si">%s</span><span class="s2">&gt; not expected&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="p">,</span>
+                    <span class="n">sex</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">phenotype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;PED file conformity line &lt;</span><span class="si">%s</span><span class="s2">&gt;; phenotype code &lt;</span><span class="si">%s</span><span class="s2">&gt; not expected&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="p">,</span>
+                    <span class="n">sex</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">individual_id</span> <span class="o">==</span> <span class="s2">&quot;0&quot;</span><span class="p">:</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;PED file conformity line &lt;</span><span class="si">%s</span><span class="s2">&gt;; Within-family ID/Sample name can&#39;t be &#39;0&#39;&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Test presence of sample in DB</span>
+            <span class="n">individual_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">family_id</span><span class="p">,</span> <span class="n">individual_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">samples_mapping</span> <span class="ow">and</span> <span class="n">individual_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">samples_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;PED file conformity line &lt;</span><span class="si">%s</span><span class="s2">&gt;; sample (family_id, individual_id):&quot;</span>
+                    <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">&gt; not found in database&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="p">,</span> <span class="n">family_id</span><span class="p">,</span> <span class="n">individual_id</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Test presence of parents in DB</span>
+            <span class="n">father_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">family_id</span><span class="p">,</span> <span class="n">father_id</span><span class="p">)</span>
+            <span class="n">mother_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">family_id</span><span class="p">,</span> <span class="n">mother_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">samples_mapping</span> <span class="ow">and</span> <span class="p">{</span><span class="n">father_key</span><span class="p">,</span> <span class="n">mother_key</span><span class="p">}</span> <span class="o">-</span> <span class="n">samples_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="c1"># If set not empty: 1 tuple is not found in DB</span>
+                <span class="c1"># =&gt; will be replaced by 0 (unknown)</span>
+                <span class="n">LOGGER</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;PED file conformity line &lt;</span><span class="si">%s</span><span class="s2">&gt;; parent sample (family_id, parent_id),&quot;</span>
+                    <span class="s2">&quot;father: &lt;</span><span class="si">%s</span><span class="s2">&gt; or mother: &lt;</span><span class="si">%s</span><span class="s2">&gt; not found in database&quot;</span><span class="p">,</span>
+                    <span class="n">index</span><span class="p">,</span> <span class="n">father_key</span><span class="p">,</span> <span class="n">mother_key</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_samples</span><span class="p">:</span>
+                <span class="n">new_sample</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">family_id</span><span class="p">,</span>
+                    <span class="n">individual_id</span><span class="p">,</span>
+                    <span class="n">father_id</span><span class="p">,</span>
+                    <span class="n">mother_id</span><span class="p">,</span>
+                    <span class="n">sex</span><span class="p">,</span>
+                    <span class="n">phenotype</span><span class="p">,</span>
+                <span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">new_sample</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">samples_mapping</span><span class="p">[</span><span class="n">individual_key</span><span class="p">],</span>  <span class="c1"># Get DB sample id</span>
+                    <span class="s2">&quot;family_id&quot;</span><span class="p">:</span> <span class="n">family_id</span><span class="p">,</span>
+                    <span class="s2">&quot;father_id&quot;</span><span class="p">:</span> <span class="n">samples_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">father_key</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="s2">&quot;mother_id&quot;</span><span class="p">:</span> <span class="n">samples_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mother_key</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                    <span class="s2">&quot;sex&quot;</span><span class="p">:</span> <span class="n">sex</span><span class="p">,</span>
+                    <span class="s2">&quot;phenotype&quot;</span><span class="p">:</span> <span class="n">phenotype</span><span class="p">,</span>
+                <span class="p">}</span>
+
+            <span class="c1"># print(new_sample)</span>
+            <span class="k">yield</span> <span class="n">new_sample</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.bedreader.BedReader &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../index.html"/>
+        <link rel="up" title="cutevariant.core.reader.bedreader" href="cutevariant.core.reader.bedreader.html"/>
+        <link rel="next" title="cutevariant.core.reader.csvreader" href="cutevariant.core.reader.csvreader.html"/>
+        <link rel="prev" title="cutevariant.core.reader.bedreader.parse_bed_file" href="cutevariant.core.reader.bedreader.parse_bed_file.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../dev_documentation.html">Documentation for developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../core_api.html">Core API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html">Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../queries.html#module-cutevariant.core.vql">VQL language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../importers.html">Project importer</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../readers.html">Readers</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../readers.html#module-cutevariant.core.readerfactory">Factory</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../readers.html#id1">Readers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../writers.html">Writers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../dev_documentation.html">Documentation for developers</a> &raquo;</li>
+        
+          <li><a href="../core_api.html">Core API</a> &raquo;</li>
+        
+          <li><a href="../readers.html">Readers</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.html">cutevariant.core.reader</a> &raquo;</li>
+        
+          <li><a href="cutevariant.core.reader.bedreader.html">cutevariant.core.reader.bedreader</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.bedreader.BedReader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/_autosummary/cutevariant.core.reader.bedreader.BedReader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="cutevariant-core-reader-bedreader-bedreader">
+<h1>cutevariant.core.reader.bedreader.BedReader<a class="headerlink" href="#cutevariant-core-reader-bedreader-bedreader" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="cutevariant.core.reader.bedreader.BedReader">
+<em class="property">class </em><code class="sig-prename descclassname">cutevariant.core.reader.bedreader.</code><code class="sig-name descname">BedReader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/bedreader.html#BedReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.bedreader.BedReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>BED file parser</p>
+<p>It is a substitution to pybedtools that is a (too) big black box to make lots
+of things, while we only need the file parser.
+Thus, pybedtools is not multiplatform compatible (thanks to Winshit OS).
+Thus (again), pybedtools doesn’t support files with spaces as separators
+(while the specification is implicit about it)…</p>
+<dl class="simple">
+<dt>We support:</dt><dd><ul class="simple">
+<li><p>Simple text files</p></li>
+<li><p>BED data as string</p></li>
+<li><p>Compressed gzip files</p></li>
+<li><p>Tabs and spaces files</p></li>
+<li><p>Bedgraph files</p></li>
+<li><p>BED files with headers</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>BED specs: <a class="reference external" href="https://www.ensembl.org/info/website/upload/bed.html">https://www.ensembl.org/info/website/upload/bed.html</a></p>
+</div>
+<p>How to use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">intervals</span> <span class="o">=</span> <span class="n">BedReader</span><span class="p">(</span><span class="s2">&quot;myfile.bed.gz)</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">intervals</span><span class="p">)</span>
+<span class="n">first_interval</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+
+<span class="n">intervals</span> <span class="o">=</span> <span class="n">BedReader</span><span class="p">(</span><span class="s2">&quot;myfile.bed)</span>
+
+<span class="n">large_string</span> <span class="o">=</span> \<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    chr1 1    10   feature1  0 +</span>
+<span class="s2">    chr1 50   60   feature2  0 -</span>
+<span class="s2">    chr1 51 59 another_feature 0 +</span>
+<span class="se">\&quot;</span><span class="s2">&quot;&quot;</span>
+<span class="s2">intervals = BedReader(large_string)</span>
+
+<span class="s2">for interval in intervals:</span>
+<span class="s2">    print(interval)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="cutevariant.core.reader.bedreader.BedReader.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/bedreader.html#BedReader.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.bedreader.BedReader.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#cutevariant.core.reader.bedreader.BedReader.__init__" title="cutevariant.core.reader.bedreader.BedReader.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(filepath, *args, **kwargs)</p></td>
+<td><p>Initialize self.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#cutevariant.core.reader.bedreader.BedReader.get_intervals" title="cutevariant.core.reader.bedreader.BedReader.get_intervals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_intervals</span></code></a>(stream)</p></td>
+<td><p>Yield Interval objects in the given stream</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="cutevariant.core.reader.bedreader.BedReader.get_intervals">
+<code class="sig-name descname">get_intervals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stream</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cutevariant/core/reader/bedreader.html#BedReader.get_intervals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.reader.bedreader.BedReader.get_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Yield Interval objects in the given stream</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__iter__()</span></code></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="cutevariant.core.reader.csvreader.html" class="btn btn-neutral float-right" title="cutevariant.core.reader.csvreader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cutevariant.core.reader.bedreader.parse_bed_file.html" class="btn btn-neutral" title="cutevariant.core.reader.bedreader.parse_bed_file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

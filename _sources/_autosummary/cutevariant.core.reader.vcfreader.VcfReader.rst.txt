@@ -1,0 +1,37 @@
+cutevariant.core.reader.vcfreader.VcfReader
+===========================================
+
+.. currentmodule:: cutevariant.core.reader.vcfreader
+
+.. autoclass:: VcfReader
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~VcfReader.__init__
+      ~VcfReader.compute_number_lines
+      ~VcfReader.get_extra_fields
+      ~VcfReader.get_extra_fields_by_category
+      ~VcfReader.get_extra_variants
+      ~VcfReader.get_fields
+      ~VcfReader.get_fields_by_category
+      ~VcfReader.get_metadatas
+      ~VcfReader.get_samples
+      ~VcfReader.get_total_file_size
+      ~VcfReader.get_variants
+      ~VcfReader.get_variants_count
+      ~VcfReader.parse_fields
+      ~VcfReader.parse_variants
+   
+   
+
+   
+   
+   

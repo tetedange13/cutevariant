@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.reader.csvreader &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../../index.html"/>
+        <link rel="up" title="Module code" href="../../../index.html"/> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.reader.csvreader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.reader.csvreader</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Standard imports</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+
+<span class="c1"># Custom imports</span>
+<span class="kn">from</span> <span class="nn">.abstractreader</span> <span class="k">import</span> <span class="n">AbstractReader</span>
+<span class="kn">from</span> <span class="nn">.annotationparser</span> <span class="k">import</span> <span class="n">VEP_ANNOTATION_DEFAULT_FIELDS</span><span class="p">,</span> <span class="n">BaseParser</span>
+<span class="kn">from</span> <span class="nn">cutevariant.commons</span> <span class="k">import</span> <span class="n">logger</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logger</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="CsvReader"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader">[docs]</a><span class="k">class</span> <span class="nc">CsvReader</span><span class="p">(</span><span class="n">AbstractReader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;VEP parser to extract data from CSV file</span>
+
+<span class="sd">    .. seealso:: AbstractReader class for more information.</span>
+
+<span class="sd">    About VEP file format:</span>
+
+<span class="sd">    http://www.ensembl.org/info/docs/tools/vep/script/vep_other.html#pick</span>
+
+<span class="sd">    If a variant overlaps a gene with multiple alternate splicing variants</span>
+<span class="sd">    (transcripts), then a block of annotation for each of these transcripts</span>
+<span class="sd">    is reported in the output. In the default VEP output format each of these</span>
+<span class="sd">    blocks is written on a single line of output; in VCF output format the</span>
+<span class="sd">    blocks are separated by commas in the INFO field.</span>
+
+<span class="sd">    Example of annotation block (1 line)::</span>
+
+<span class="sd">        #Uploaded_variation   Location   Allele   Consequence   IMPACT</span>
+<span class="sd">        SYMBOL   Gene   Feature_type   Feature   BIOTYPE   EXON   INTRON   HGVSc</span>
+<span class="sd">        HGVSp   cDNA_position   CDS_position   Protein_position</span>
+<span class="sd">        Amino_acids   Codons   Existing_variation   DISTANCE</span>
+<span class="sd">        STRAND   FLAGS   SYMBOL_SOURCE   HGNC_ID   TSL   APPRIS</span>
+<span class="sd">        REFSEQ_MATCHGIVEN_REF   USED_REF   BAM_EDIT</span>
+<span class="sd">        SIFT   PolyPhen   AF   CLIN_SIG   SOMATIC   PHENO</span>
+<span class="sd">        PUBMED   MOTIF_NAME   MOTIF_POS   HIGH_INF_POS   MOTIF_SCORE_CHANGE</span>
+<span class="sd">        LRT_pred   LRT_score   MutationTaster_model   MutationTaster_pred</span>
+<span class="sd">        SIFT_pred   SIFT_score   clinvar_clnsig   clinvar_rs   clinvar_trait</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="CsvReader.__init__"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">):</span>
+        <span class="c1"># Note: number of lines is computed in parent class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># Quick tests on the input file...</span>
+        <span class="n">first_line</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="n">csv_dialect</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">first_line</span><span class="p">)</span>
+
+        <span class="c1"># Is this file has a correct header ?</span>
+        <span class="c1"># Test 2 first lines</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span><span class="o">.</span><span class="n">has_header</span><span class="p">(</span><span class="n">first_line</span> <span class="o">+</span> <span class="n">device</span><span class="o">.</span><span class="n">readline</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">header</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No header detected in the file; not a CSV file?&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Build a csv reader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="n">csv_dialect</span><span class="p">)</span>
+
+        <span class="c1"># hacky hacky...</span>
+        <span class="c1"># We use BaseParser here only for its function handle_descriptions()</span>
+        <span class="c1"># that generate full description of annotation fields by taking into</span>
+        <span class="c1"># account default supported fields set by with VEP_ANNOTATION_DEFAULT_FIELDS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_parser</span> <span class="o">=</span> <span class="n">BaseParser</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_parser</span><span class="o">.</span><span class="n">annotation_default_fields</span> <span class="o">=</span> <span class="n">VEP_ANNOTATION_DEFAULT_FIELDS</span>
+
+        <span class="c1"># Some columns are ignored or mapped manually to standard ones</span>
+        <span class="c1"># (chr, pos, ref, alt)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignored_columns</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;location&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;allele&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;#uploaded_variation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;given_ref&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;used_ref&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fields descriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;CsvReader::init: CSV fields found: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">csv_reader</span><span class="o">.</span><span class="n">fieldnames</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+
+<div class="viewcode-block" id="CsvReader.get_fields"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader.get_fields">[docs]</a>    <span class="k">def</span> <span class="nf">get_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get full fields descriptions</span>
+
+<span class="sd">        .. note:: Annotations fields are added here if they exist in the file.</span>
+
+<span class="sd">        .. seealso:: :meth:`parse_fields` for basic default fields.</span>
+
+<span class="sd">        :return: Tuple of fields.</span>
+<span class="sd">            Each field is a dict with the following keys:</span>
+<span class="sd">            `name, category, description, type`.</span>
+<span class="sd">            Some fields have an additional constraint key when they are destined</span>
+<span class="sd">            to be a primary key in the database.</span>
+<span class="sd">            Annotations fields are added here if they exist in the file.</span>
+<span class="sd">        :rtype: &lt;tuple &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CsvReader::get_fields: called&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">:</span>
+            <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;CsvReader::get_fields: parse&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_fields</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span></div>
+
+<div class="viewcode-block" id="CsvReader.get_variants"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader.get_variants">[docs]</a>    <span class="k">def</span> <span class="nf">get_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get variants as an iterable of dictionnaries</span>
+
+<span class="sd">        &quot;annotations&quot; key is added here with the list of annotations if</span>
+<span class="sd">        they exist in the file.</span>
+
+<span class="sd">        .. seealso:: parse_variant()</span>
+
+<span class="sd">        :return: Generator of full variants with &quot;annotations&quot; key.</span>
+<span class="sd">        :rtype: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_variants</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CsvReader.get_samples"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader.get_samples">[docs]</a>    <span class="k">def</span> <span class="nf">get_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return samples (individual/family data) of the file (empty list for this reader)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="CsvReader.parse_fields"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader.parse_fields">[docs]</a>    <span class="k">def</span> <span class="nf">parse_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;See :meth:`get_fields`&quot;&quot;&quot;</span>
+        <span class="k">yield</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;chr&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Chromosome&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;constraint&quot;</span><span class="p">:</span> <span class="s2">&quot;NOT NULL&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">yield</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reference position, with the 1st base having position 1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;int&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;constraint&quot;</span><span class="p">:</span> <span class="s2">&quot;NOT NULL&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">yield</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ref&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Reference base&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;constraint&quot;</span><span class="p">:</span> <span class="s2">&quot;NOT NULL&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">yield</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;alt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Alternative base&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;str&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;constraint&quot;</span><span class="p">:</span> <span class="s2">&quot;NOT NULL&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Get all fields (except the ignored ones)</span>
+        <span class="n">raw_fields</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">field</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">csv_reader</span><span class="o">.</span><span class="n">fieldnames</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignored_columns</span>
+        <span class="p">)</span>
+        <span class="c1"># yield full remaped field</span>
+        <span class="c1"># Hack fix this... the Base class should possess this attribute</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotation_parser</span><span class="o">.</span><span class="n">annotation_field_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_parser</span><span class="o">.</span><span class="n">handle_descriptions</span><span class="p">(</span><span class="n">raw_fields</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CsvReader.parse_variants"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader.parse_variants">[docs]</a>    <span class="k">def</span> <span class="nf">parse_variants</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read file and parse variants</span>
+
+<span class="sd">        .. todo: Handle samples</span>
+
+<span class="sd">        .. note:: Each line is a transcript; there are many transcripts per variant.</span>
+
+<span class="sd">        :return: Generator of variants.</span>
+<span class="sd">        :rtype: &lt;generator &lt;dict&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">add_annotation_to_variant</span><span class="p">():</span>
+            <span class="sd">&quot;&quot;&quot;Add annotation to the current variant&quot;&quot;&quot;</span>
+            <span class="c1"># No annotation parsed</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">annotation</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">annotations</span> <span class="o">=</span> <span class="n">variant</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;annotations&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">annotations</span><span class="p">:</span>
+                <span class="c1"># Update</span>
+                <span class="n">annotations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Set</span>
+                <span class="n">variant</span><span class="p">[</span><span class="s2">&quot;annotations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">annotation</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotation_parser</span><span class="o">.</span><span class="n">annotation_field_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Cannot parse variant without parsing fields first&quot;</span><span class="p">)</span>
+
+        <span class="n">variants</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">transcript_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">transcript_idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">csv_reader</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+
+            <span class="c1"># Build primary key by mapping existing fields in the original file</span>
+            <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">location_to_chr_pos</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Location&quot;</span><span class="p">])</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;GIVEN_REF&quot;</span><span class="p">]</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Allele&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;USED_REF&quot;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="c1"># Check consistency</span>
+                <span class="k">assert</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;GIVEN_REF&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;USED_REF&quot;</span><span class="p">],</span> <span class="s2">&quot;GIVEN_REF != USED_REF&quot;</span>
+
+            <span class="n">primary_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">alt</span><span class="p">)</span>
+            <span class="c1"># Get previous variant with same primary key (previous transcript)</span>
+            <span class="n">variant</span> <span class="o">=</span> <span class="n">variants</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">primary_key</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+
+            <span class="c1"># filtre les champs non voulus, cherche ceux qui restent dans</span>
+            <span class="c1"># VEP_ANNOTATION_DEFAULT_FIELDS pour savoir s&#39;ils sont supportés;</span>
+            <span class="c1"># sinon les ajoute en lower case en fallback</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="c1"># Remove unwanted fields</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignored_columns</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">raw_key</span> <span class="ow">in</span> <span class="n">g</span><span class="p">:</span>
+                <span class="n">lower_key</span> <span class="o">=</span> <span class="n">raw_key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="c1"># Get supported fields</span>
+                <span class="n">field_descript</span> <span class="o">=</span> <span class="n">VEP_ANNOTATION_DEFAULT_FIELDS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lower_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">field_descript</span><span class="p">:</span>
+                    <span class="c1"># Use supported field name</span>
+                    <span class="n">lower_key</span> <span class="o">=</span> <span class="n">field_descript</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+
+                <span class="n">annotation</span><span class="p">[</span><span class="n">lower_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">raw_key</span><span class="p">]</span>
+
+            <span class="c1"># Quicker ?</span>
+            <span class="c1"># annotation = {</span>
+            <span class="c1">#    VEP_ANNOTATION_DEFAULT_FIELDS.get(key.lower(), {&#39;name&#39;: key.lower()})[&#39;name&#39;]: value</span>
+            <span class="c1">#    for key, value in row.items() if key.lower() not in self.ignored_columns</span>
+            <span class="c1"># }</span>
+
+            <span class="k">if</span> <span class="n">variant</span><span class="p">:</span>
+                <span class="c1"># Variant already created</span>
+                <span class="c1"># Append current annotation to the previous ones</span>
+                <span class="n">add_annotation_to_variant</span><span class="p">()</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># New variant</span>
+            <span class="n">variant</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">],</span> <span class="n">variant</span><span class="p">[</span><span class="s2">&quot;pos&quot;</span><span class="p">],</span> <span class="n">variant</span><span class="p">[</span><span class="s2">&quot;ref&quot;</span><span class="p">],</span> <span class="n">variant</span><span class="p">[</span><span class="s2">&quot;alt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">primary_key</span>
+
+            <span class="c1"># Set current annotation</span>
+            <span class="n">add_annotation_to_variant</span><span class="p">()</span>
+
+            <span class="c1"># testing purpose</span>
+            <span class="c1">#            variant[&quot;samples&quot;] = [</span>
+            <span class="c1">#                {&quot;name&quot;: &quot;boby&quot;, &quot;gt&quot;: 0},</span>
+            <span class="c1">#                {&quot;name&quot;: &quot;sacha&quot;, &quot;gt&quot;: 1},</span>
+            <span class="c1">#                {&quot;name&quot;: &quot;olivier&quot;, &quot;gt&quot;: 2},</span>
+            <span class="c1">#            ]</span>
+
+            <span class="n">variants</span><span class="p">[</span><span class="n">primary_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">variant</span>
+
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;CsvReader::parse_variants: transcripts </span><span class="si">%s</span><span class="s2">, variants </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">transcript_idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">variants</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">variant</span> <span class="ow">in</span> <span class="n">variants</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="nb">dict</span><span class="p">(</span><span class="n">variant</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CsvReader.location_to_chr_pos"><a class="viewcode-back" href="../../../../_autosummary/cutevariant.core.reader.csvreader.CsvReader.html#cutevariant.core.reader.csvreader.CsvReader.location_to_chr_pos">[docs]</a>    <span class="k">def</span> <span class="nf">location_to_chr_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse VEP `Location` field to extract `chr`, `pos` fields</span>
+
+<span class="sd">        2 representations can be encountered in standard coordinate format</span>
+<span class="sd">            - chr:start</span>
+<span class="sd">            - chr:start-end</span>
+
+<span class="sd">        The start position is always returned as `pos` value.</span>
+
+<span class="sd">        :Example:</span>
+<span class="sd">            11:10000-10000 =&gt; chr, pos =&gt; 11, 10000</span>
+
+<span class="sd">        :param location: Location field in a VEP file.</span>
+<span class="sd">        :return: Tuple of chr and pos data.</span>
+<span class="sd">        :rtype: &lt;tuple &lt;str&gt;, &lt;str&gt;&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chrom</span><span class="p">,</span> <span class="n">positions</span> <span class="o">=</span> <span class="n">location</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">pos</span></div>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;VEP Reader using {type(self.annotation_parser).__name__}&quot;</span></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

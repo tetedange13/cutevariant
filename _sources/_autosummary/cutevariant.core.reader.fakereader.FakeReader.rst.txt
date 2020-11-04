@@ -1,0 +1,35 @@
+cutevariant.core.reader.fakereader.FakeReader
+=============================================
+
+.. currentmodule:: cutevariant.core.reader.fakereader
+
+.. autoclass:: FakeReader
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FakeReader.__init__
+      ~FakeReader.compute_number_lines
+      ~FakeReader.get_extra_fields
+      ~FakeReader.get_extra_fields_by_category
+      ~FakeReader.get_extra_variants
+      ~FakeReader.get_fields
+      ~FakeReader.get_fields_by_category
+      ~FakeReader.get_metadatas
+      ~FakeReader.get_samples
+      ~FakeReader.get_total_file_size
+      ~FakeReader.get_variants
+      ~FakeReader.get_variants_count
+   
+   
+
+   
+   
+   

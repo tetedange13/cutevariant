@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Readers &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="index.html"/>
+        <link rel="up" title="Core API" href="core_api.html"/>
+        <link rel="next" title="cutevariant.core.reader" href="_autosummary/cutevariant.core.reader.html"/>
+        <link rel="prev" title="Project importer" href="importers.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="dev_documentation.html">Documentation for developers</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="core_api.html">Core API</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="queries.html">Queries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="queries.html#module-cutevariant.core.vql">VQL language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="importers.html">Project importer</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Readers</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-cutevariant.core.readerfactory">Factory</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Readers</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="writers.html">Writers</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="dev_documentation.html">Documentation for developers</a> &raquo;</li>
+        
+          <li><a href="core_api.html">Core API</a> &raquo;</li>
+        
+      <li>Readers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/readers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="readers">
+<h1>Readers<a class="headerlink" href="#readers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-cutevariant.core.readerfactory">
+<span id="factory"></span><h2>Factory<a class="headerlink" href="#module-cutevariant.core.readerfactory" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="cutevariant.core.readerfactory.create_reader">
+<code class="sig-prename descclassname">cutevariant.core.readerfactory.</code><code class="sig-name descname">create_reader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cutevariant/core/readerfactory.html#create_reader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.readerfactory.create_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Context manager that wraps the given file and return an accurate reader</p>
+<p>A detection of the file type is made as well as a detection of the
+annotations format if required.</p>
+<p>Filetypes and annotations parsers supported:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>vcf.gz: snpeff, vep</p></li>
+<li><p>vcf: snpeff, vep</p></li>
+<li><p>csv, tsv, txt: vep</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="cutevariant.core.readerfactory.detect_vcf_annotation">
+<code class="sig-prename descclassname">cutevariant.core.readerfactory.</code><code class="sig-name descname">detect_vcf_annotation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cutevariant/core/readerfactory.html#detect_vcf_annotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cutevariant.core.readerfactory.detect_vcf_annotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the name of the annotation parser to be used on the given file</p>
+<p>Called: In the importer and in the project wizard to display the detected
+annotations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>“vep”, “snpeff”, None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h2>Readers<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/cutevariant.core.reader.html#module-cutevariant.core.reader" title="cutevariant.core.reader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cutevariant.core.reader</span></code></a></p></td>
+<td><p>Expose of high-level reader classes</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="_autosummary/cutevariant.core.reader.html" class="btn btn-neutral float-right" title="cutevariant.core.reader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="importers.html" class="btn btn-neutral" title="Project importer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

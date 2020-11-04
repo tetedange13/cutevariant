@@ -1,0 +1,38 @@
+cutevariant.core.reader.bedreader
+=================================
+
+.. automodule:: cutevariant.core.reader.bedreader
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      parse_bed_file
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      BedReader
+   
+   
+
+   
+   
+   
+
+
+

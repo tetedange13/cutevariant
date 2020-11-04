@@ -1,0 +1,6 @@
+cutevariant.core.reader.abstractreader.check\_variant\_schema
+=============================================================
+
+.. currentmodule:: cutevariant.core.reader.abstractreader
+
+.. autofunction:: check_variant_schema

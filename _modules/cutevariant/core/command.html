@@ -1,0 +1,724 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>cutevariant.core.command &mdash; Cutevariant  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../../genindex.html"/>
+        <link rel="search" title="Search" href="../../../search.html"/>
+    <link rel="top" title="Cutevariant  documentation" href="../../../index.html"/>
+        <link rel="up" title="Module code" href="../../index.html"/> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Cutevariant
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html#development">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../command_line_usage.html">Command line usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dev_documentation.html">Documentation for developers</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Cutevariant</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>cutevariant.core.command</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for cutevariant.core.command</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Design pattern &quot;COMMANDS&quot; to execute VQL query .</span>
+
+<span class="sd">Each VQL statement corresponds to a &lt;name&gt;_cmd() function.</span>
+<span class="sd">You can use `execute(conn, vql)` or `execute_all(conn, vql)` to run a specific</span>
+<span class="sd">VQL query.</span>
+
+<span class="sd">Each command returns a JSON array with a success status code or with the</span>
+<span class="sd">expected result.</span>
+
+<span class="sd">Command module is usefull for CLI and for running VQL scripts.</span>
+
+<span class="sd">Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; conn = sqlite.Connection(&quot;project.db&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; for variant in execute(conn, &quot;SELECT chr, pos FROM variants&quot;):</span>
+<span class="sd">    ...     print(variant)</span>
+<span class="sd">    &gt;&gt;&gt; # How many variants ?</span>
+<span class="sd">    &gt;&gt;&gt; print(execute(conn, &quot;COUNT FROM variants&quot;))</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Standard imports</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="c1"># Pip install ( because functools doesnt work with unhachable)</span>
+<span class="kn">from</span> <span class="nn">memoization</span> <span class="k">import</span> <span class="n">cached</span>
+
+<span class="c1"># Custom imports</span>
+<span class="kn">from</span> <span class="nn">cutevariant.core.querybuilder</span> <span class="k">import</span> <span class="n">build_sql_query</span><span class="p">,</span> <span class="n">build_full_sql_query</span>
+<span class="kn">from</span> <span class="nn">cutevariant.core</span> <span class="k">import</span> <span class="n">sql</span><span class="p">,</span> <span class="n">vql</span>
+<span class="kn">from</span> <span class="nn">cutevariant.commons</span> <span class="k">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">cutevariant.core.reader</span> <span class="k">import</span> <span class="n">BedReader</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="n">logger</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="select_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.select_cmd">[docs]</a><span class="k">def</span> <span class="nf">select_cmd</span><span class="p">(</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;alt&quot;</span><span class="p">),</span>
+    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">order_desc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">group_by</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">having</span><span class="o">=</span><span class="p">{},</span>  <span class="c1"># {&quot;op&quot;:&quot;&gt;&quot;, &quot;value&quot;: 3  }</span>
+    <span class="n">limit</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Select query Command</span>
+
+<span class="sd">    This following VQL command:</span>
+<span class="sd">        `SELECT chr,pos FROM variants WHERE pos &gt; 3`</span>
+<span class="sd">    will execute :</span>
+<span class="sd">        `select_cmd(conn, [&quot;chr&quot;, &quot;pos&quot;], variants&quot;, {&quot;AND&quot;: [{&quot;pos&quot;,&quot;=&quot;,3}]}))`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        fields (list, optional): list of fields</span>
+<span class="sd">        filters (dict, optional): nested tree of condition</span>
+<span class="sd">        source (str, optional): virtual table source</span>
+<span class="sd">        order_by (list, optional): order by field name</span>
+<span class="sd">        order_desc (bool, optional): Descending or Ascending Order</span>
+<span class="sd">        limit (int, optional): record count</span>
+<span class="sd">        offset (int, optional): record count per page</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        variants (dict)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">build_full_sql_query</span><span class="p">(</span>
+        <span class="n">conn</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+        <span class="n">order_by</span><span class="o">=</span><span class="n">order_by</span><span class="p">,</span>
+        <span class="n">order_desc</span><span class="o">=</span><span class="n">order_desc</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span>
+        <span class="n">group_by</span><span class="o">=</span><span class="n">group_by</span><span class="p">,</span>
+        <span class="n">having</span><span class="o">=</span><span class="n">having</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;command:select_cmd:: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">):</span>
+        <span class="c1"># THIS IS INSANE... SQLITE DOESNT RETURN ALIAS NAME WITH SQUARE BRACKET....</span>
+        <span class="c1"># I HAVE TO replace [] by () and go back after...</span>
+        <span class="c1"># TODO : Change VQL Syntax from [] to () would be a good alternative</span>
+        <span class="c1"># @See QUERYBUILDER</span>
+        <span class="c1"># See : https://stackoverflow.com/questions/41538952/issue-cursor-description-never-returns-square-bracket-in-column-name-python-2-7-sqlite3-alias</span>
+        <span class="k">yield</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">,</span> <span class="s2">&quot;[&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">,</span> <span class="s2">&quot;]&quot;</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
+
+
+<div class="viewcode-block" id="count_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.count_cmd">[docs]</a><span class="nd">@cached</span><span class="p">(</span><span class="n">max_size</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">count_cmd</span><span class="p">(</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;chr&quot;</span><span class="p">,</span> <span class="s2">&quot;pos&quot;</span><span class="p">,</span> <span class="s2">&quot;ref&quot;</span><span class="p">,</span> <span class="s2">&quot;alt&quot;</span><span class="p">],</span>
+    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">group_by</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">having</span><span class="o">=</span><span class="p">{},</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Count command</span>
+
+<span class="sd">    This following VQL command:</span>
+<span class="sd">        `COUNT FROM variants WHERE pos &gt; 3`</span>
+<span class="sd">    will execute :</span>
+<span class="sd">        `count_cmd(conn, &quot;variants&quot;, {&quot;AND&quot;: [{&quot;pos&quot;,&quot;=&quot;,3}]}))`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        source (str, optional): virtual source table</span>
+<span class="sd">        filters (dict, optional): nested tree of condition</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Count of variants wgstith &quot;count&quot; as a key</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># See #177: Check if fields has annotations</span>
+    <span class="c1"># If an annotation field is selected, the variant count stored in the selection</span>
+    <span class="c1"># table (count without taking account of annotations) is different.</span>
+    <span class="c1"># This leads to a fault in the pagination hiding the latest variants if</span>
+    <span class="c1"># more than 50 must be displayed.</span>
+    <span class="n">variants_fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_field_by_category</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="s2">&quot;variants&quot;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">variants_fields</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">filters</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">group_by</span><span class="p">:</span>
+        <span class="c1"># All fields are in variants table</span>
+        <span class="c1"># Returned stored cache variant</span>
+        <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;command:count_cmd:: cached from selections table&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">f</span><span class="s2">&quot;SELECT count FROM selections WHERE name = &#39;</span><span class="si">{source}</span><span class="s2">&#39;&quot;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">}</span>
+
+    <span class="n">query</span> <span class="o">=</span> <span class="n">build_full_sql_query</span><span class="p">(</span>
+        <span class="n">conn</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">order_by</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">group_by</span><span class="o">=</span><span class="n">group_by</span><span class="p">,</span>
+        <span class="n">having</span><span class="o">=</span><span class="n">having</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># THIS IS INSANE... SQLITE DOESNT RETURN ALIAS NAME WITH SQUARE BRACKET....</span>
+    <span class="c1"># I HAVE TO replace [] by () and go back after...</span>
+    <span class="c1"># TODO : Change VQL Syntax from [] to () would be a good alternative</span>
+    <span class="c1"># @See QUERYBUILDER</span>
+    <span class="c1"># See : https://stackoverflow.com/questions/41538952/issue-cursor-description-never-returns-square-bracket-in-column-name-python-2-7-sqlite3-alias</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;command:count_cmd:: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">count_query</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">query</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="drop_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.drop_cmd">[docs]</a><span class="k">def</span> <span class="nf">drop_cmd</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span> <span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Drop selection or set from database</span>
+
+<span class="sd">    This following VQL commands::</span>
+
+<span class="sd">        DROP selections boby</span>
+<span class="sd">        DROP wordsets mygene</span>
+
+<span class="sd">    will execute::</span>
+
+<span class="sd">        drop_cmd(conn, &quot;selections&quot;, &quot;boby&quot;)</span>
+<span class="sd">        drop_cmd(conn, &quot;wordsets&quot;, &quot;boby&quot;)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite connection</span>
+<span class="sd">        feature (str): selections or wordsets (Names of the SQL tables).</span>
+<span class="sd">            Lower case features are also accepted.</span>
+<span class="sd">        name (str): name of the selection or name of the wordset</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: {&quot;success&quot;: &lt;boolean&gt;}; True if deletion is ok, False otherwise.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        vql.VQLSyntaxError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">accept_features</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;selections&quot;</span><span class="p">,</span> <span class="s2">&quot;wordsets&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Cast to lower case</span>
+    <span class="n">feature</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">accept_features</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{feature}</span><span class="s2"> doesn&#39;t exists&quot;</span><span class="p">)</span>
+
+    <span class="n">affected_lines</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">delete_by_name</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">table_name</span><span class="o">=</span><span class="n">feature</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">affected_lines</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="create_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.create_cmd">[docs]</a><span class="k">def</span> <span class="nf">create_cmd</span><span class="p">(</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">source</span><span class="o">=</span><span class="s2">&quot;variants&quot;</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+    <span class="n">count</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a selection from the given source, filtered by filters</span>
+
+<span class="sd">    This following VQL command:</span>
+<span class="sd">        `CREATE boby FROM variants WHERE pos &gt; 3`</span>
+<span class="sd">    will execute :</span>
+<span class="sd">        `create_cmd(conn, &quot;boby&quot;, &quot;variants&quot;, {&quot;AND&quot;:[{&quot;pos&quot;,&quot;&gt;&quot;,3}]})`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        target (str): target selection name</span>
+<span class="sd">        source (str): source selection name</span>
+<span class="sd">        filters (dict): filters used to select the variants from source</span>
+<span class="sd">        count (int): precomputed variant count</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: {&quot;id&quot;: selection_id} if lines have been inserted,</span>
+<span class="sd">            or empty dict in case of error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="n">sql_query</span> <span class="o">=</span> <span class="n">build_full_sql_query</span><span class="p">(</span>
+        <span class="n">conn</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">],</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+        <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;command:create_cmd:: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sql_query</span><span class="p">)</span>
+    <span class="n">selection_id</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">create_selection_from_sql</span><span class="p">(</span>
+        <span class="n">conn</span><span class="p">,</span> <span class="n">sql_query</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span> <span class="n">from_selection</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">selection_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">selection_id</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="set_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.set_cmd">[docs]</a><span class="k">def</span> <span class="nf">set_cmd</span><span class="p">(</span>
+    <span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">first</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform set operation like intersection, union and difference between two table selection</span>
+
+<span class="sd">    This following VQL command:</span>
+<span class="sd">        `CREATE boby = raymond &amp; charles`</span>
+<span class="sd">    will execute :</span>
+<span class="sd">        `set_cmd(conn, &quot;boby&quot;, &quot;raymond&quot;, &quot;charles&quot;, &quot;&amp;&quot;)`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        target (str): table selection target</span>
+<span class="sd">        first (str): first selection in operation</span>
+<span class="sd">        second (str): second selection in operation</span>
+<span class="sd">        operator (str): + (union), - (difference), &amp; (intersection) Set operators</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: {&quot;id&quot;: selection_id} if lines have been inserted,</span>
+<span class="sd">            or empty dict in case of error</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        {&quot;id&quot;: 2}: 2 lines inserted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">first</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">second</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">operator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="n">query_first</span> <span class="o">=</span> <span class="n">build_sql_query</span><span class="p">([</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">first</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">query_second</span> <span class="o">=</span> <span class="n">build_sql_query</span><span class="p">([</span><span class="s2">&quot;id&quot;</span><span class="p">],</span> <span class="n">second</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">func_query</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;|&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">union_variants</span><span class="p">,</span>
+        <span class="s2">&quot;-&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">subtract_variants</span><span class="p">,</span>
+        <span class="s2">&quot;&amp;&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">intersect_variants</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="n">sql_query</span> <span class="o">=</span> <span class="n">func_query</span><span class="p">[</span><span class="n">operator</span><span class="p">](</span><span class="n">query_first</span><span class="p">,</span> <span class="n">query_second</span><span class="p">)</span>
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;command:set_cmd:: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">sql_query</span><span class="p">)</span>
+
+    <span class="n">selection_id</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">create_selection_from_sql</span><span class="p">(</span>
+        <span class="n">conn</span><span class="p">,</span> <span class="n">sql_query</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">from_selection</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">selection_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">selection_id</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="bed_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.bed_cmd">[docs]</a><span class="k">def</span> <span class="nf">bed_cmd</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a new selection from a bed file</span>
+
+<span class="sd">    This following VQL command:</span>
+<span class="sd">        `CREATE boby FROM variants INTERSECT &quot;path/to/file.bed&quot;`</span>
+<span class="sd">    will execute :</span>
+<span class="sd">        `bed_cmd(conn, &quot;path/to/file.bed&quot;, &quot;boby&quot;, &quot;source&quot;)`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        path (str): path to bedfile ( a 3 columns files with chr, start, end )</span>
+<span class="sd">        target (str): target selection table</span>
+<span class="sd">        source (str): source selection table</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: {&quot;id&quot;: id of last line inserted} if lines have been inserted,</span>
+<span class="sd">            or empty dict in case of error</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        vql.VQLSyntaxError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{path}</span><span class="s2"> doesn&#39;t exists&quot;</span><span class="p">)</span>
+
+    <span class="c1"># bed_intervals: chrom, start, end, name, etc. keys in each interval</span>
+    <span class="c1"># see also cutevariant/core/reader/bedreader.py</span>
+    <span class="n">selection_id</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">create_selection_from_bed</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">BedReader</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">selection_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">selection_id</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="show_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.show_cmd">[docs]</a><span class="k">def</span> <span class="nf">show_cmd</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span> <span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Show command display information from a SHOW query</span>
+
+<span class="sd">    This following VQL command:</span>
+<span class="sd">        `SHOW variants`</span>
+<span class="sd">    will execute :</span>
+<span class="sd">        `show_cmd(conn, &quot;variants&quot;)`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        feature (str): Requested feature type of items (Name of the SQL table);</span>
+<span class="sd">            Lower case features are also accepted.</span>
+<span class="sd">        can be: `&quot;selections&quot;, &quot;fields&quot;, &quot;samples&quot;, &quot;wordsets&quot;`</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        (generator[dict]): Items according to requested feature.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        vql.VQLSyntaxError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">accepted_features</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;selections&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_selections</span><span class="p">,</span>
+        <span class="s2">&quot;fields&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_fields</span><span class="p">,</span>
+        <span class="s2">&quot;samples&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_samples</span><span class="p">,</span>
+        <span class="s2">&quot;wordsets&quot;</span><span class="p">:</span> <span class="n">sql</span><span class="o">.</span><span class="n">get_wordsets</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Cast in lower case</span>
+    <span class="n">feature</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">accepted_features</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;option </span><span class="si">{feature}</span><span class="s2"> doesn&#39;t exists&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">accepted_features</span><span class="p">[</span><span class="n">feature</span><span class="p">](</span><span class="n">conn</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">item</span></div>
+
+
+<div class="viewcode-block" id="import_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.import_cmd">[docs]</a><span class="k">def</span> <span class="nf">import_cmd</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span> <span class="n">feature</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Import command for wordsets only</span>
+
+<span class="sd">    This following VQL command:</span>
+<span class="sd">        `IMPORT WORDSETS &quot;gene.txt&quot; AS boby`</span>
+<span class="sd">    will execute :</span>
+<span class="sd">        `import_cmd(conn, &quot;WORDSETS&quot;, &quot;gene.txt&quot;)`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        feature (str): &quot;WORDSETS&quot; (Name of the SQL table)</span>
+<span class="sd">        name (str): name of the set</span>
+<span class="sd">        path (str): a filepath</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: `{success: &lt;boolean&gt;}`</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        vql.VQLSyntaxError</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">accepted_features</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;wordsets&quot;</span><span class="p">,)</span>
+
+    <span class="k">if</span> <span class="n">feature</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">accepted_features</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;option </span><span class="si">{feature}</span><span class="s2"> doesn&#39;t exists&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{path}</span><span class="s2"> doesn&#39;t exists&quot;</span><span class="p">)</span>
+
+    <span class="n">affected_rows</span> <span class="o">=</span> <span class="n">sql</span><span class="o">.</span><span class="n">import_wordset_from_file</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">affected_rows</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)}</span></div>
+
+
+<div class="viewcode-block" id="create_command_from_obj"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.create_command_from_obj">[docs]</a><span class="k">def</span> <span class="nf">create_command_from_obj</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">vql_obj</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create command function from vql object according to its &quot;cmd&quot; key</span>
+
+<span class="sd">    cmd authorized:</span>
+
+<span class="sd">        - select_cmd</span>
+<span class="sd">        - count_cmd</span>
+<span class="sd">        - drop_cmd</span>
+<span class="sd">        - create_cmd</span>
+<span class="sd">        - set_cmd</span>
+<span class="sd">        - bed_cmd</span>
+<span class="sd">        - show_cmd</span>
+<span class="sd">        - import_cmd</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        Use :meth:`execute` instead, that is a wrapper to this function.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        If you want to create a select_cmd function, pass a vql_obj like this one:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &quot;cmd&quot;: &quot;select_cmd&quot;,</span>
+<span class="sd">                &quot;fields&quot;: [&quot;chr&quot;, &quot;pos&quot;],</span>
+<span class="sd">                &quot;source&quot;: &quot;variants&quot;,</span>
+<span class="sd">                &quot;filters&quot;: {},</span>
+<span class="sd">            }</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3.connection</span>
+<span class="sd">        vql_obj (dict): A VQL object with requested commands at &quot;cmd&quot; key:</span>
+<span class="sd">            `select_cmd, create_cmd, set_cmd, bed_cmd, show_cmd, import_cmd,</span>
+<span class="sd">            drop_cmd, count_cmd`.</span>
+<span class="sd">            A VQL object is dictionary returned by vql.parse.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (function): Function object wrapping the given vql_object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="n">vql_obj</span><span class="p">[</span><span class="s2">&quot;cmd&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">command</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="nb">globals</span><span class="p">()[</span><span class="n">command</span><span class="p">],</span> <span class="n">conn</span><span class="p">,</span> <span class="o">**</span><span class="n">vql_obj</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">vql</span><span class="o">.</span><span class="n">VQLSyntaxError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;cmd </span><span class="si">{command}</span><span class="s2"> doesn&#39;t exists&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="execute"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.execute">[docs]</a><span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span> <span class="n">vql_source</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute a vql query</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; for variant in execute(conn,&quot;SELECT chr from variants&quot;):</span>
+<span class="sd">        &gt;&gt;&gt;     print(variant)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        vql_source (str): a VQL query</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Return command output as a dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Convert VQL string into VQL object</span>
+    <span class="n">vql_obj</span> <span class="o">=</span> <span class="n">vql</span><span class="o">.</span><span class="n">parse_one_vql</span><span class="p">(</span><span class="n">vql_source</span><span class="p">)</span>
+    <span class="c1"># Convert VQL object into wrapped SQL query</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="n">create_command_from_obj</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">vql_obj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cmd</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="execute_all"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.execute_all">[docs]</a><span class="k">def</span> <span class="nf">execute_all</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Connection</span><span class="p">,</span> <span class="n">vql_source</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute a vql script</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; execute_all(</span>
+<span class="sd">        ...     &quot;CREATE boby FROM variants; CREATE raymon FROM variants;&quot;</span>
+<span class="sd">        ...     &quot;CREATE charles = boby - variants; COUNT(charles)&quot;</span>
+<span class="sd">        ... )</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        conn (sqlite3.Connection): sqlite3 connection</span>
+<span class="sd">        vql_source (str): a VQL query</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        (generator[dict]): Yield command outputs as a dicts</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">vql_obj</span> <span class="ow">in</span> <span class="n">vql</span><span class="o">.</span><span class="n">parse_vql</span><span class="p">(</span><span class="n">vql_source</span><span class="p">):</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">create_command_from_obj</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">vql_obj</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">cmd</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="clear_cache_cmd"><a class="viewcode-back" href="../../../queries.html#cutevariant.core.command.clear_cache_cmd">[docs]</a><span class="k">def</span> <span class="nf">clear_cache_cmd</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Clear function cache by memoization module.</span>
+
+<span class="sd">    This method must be called when new project is open</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">count_cmd</span><span class="o">.</span><span class="n">cache_clear</span><span class="p">()</span></div>
+
+
+<span class="c1"># class CommandGraph(object):</span>
+<span class="c1">#     def __init__(self, conn):</span>
+<span class="c1">#         super().__init__()</span>
+<span class="c1">#         self.conn = conn</span>
+<span class="c1">#         self.graph = nx.DiGraph()</span>
+<span class="c1">#         self.graph.add_node(&quot;variants&quot;)</span>
+
+<span class="c1">#     def add_command(self, command: Command):</span>
+
+<span class="c1">#         if type(command) == CreateCommand:</span>
+<span class="c1">#             self.graph.add_node(command.target)</span>
+<span class="c1">#             self.graph.add_edge(command.source, command.target)</span>
+
+<span class="c1">#         if type(command) == SelectCommand:</span>
+<span class="c1">#             self.graph.add_node(&quot;Select&quot;)</span>
+<span class="c1">#             self.graph.add_edge(command.source, &quot;Select&quot;)</span>
+
+<span class="c1">#         if type(command) == SetCommand:</span>
+<span class="c1">#             self.graph.add_node(command.target)</span>
+<span class="c1">#             self.graph.add_edge(command.first, command.target)</span>
+<span class="c1">#             self.graph.add_edge(command.second, command.target)</span>
+
+<span class="c1">#     def set_source(self, source):</span>
+<span class="c1">#         self.graph.clear()</span>
+<span class="c1">#         for vql_obj in vql.parse_vql(source):</span>
+<span class="c1">#             cmd = create_command_from_vql_objet(self.conn, vql_obj)</span>
+<span class="c1">#             self.add_command(cmd)</span>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, labsquare.org.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="../../../_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

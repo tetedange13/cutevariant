@@ -1,0 +1,6 @@
+cutevariant.core.reader.abstractreader.sanitize\_field\_name
+============================================================
+
+.. currentmodule:: cutevariant.core.reader.abstractreader
+
+.. autofunction:: sanitize_field_name

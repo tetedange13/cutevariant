@@ -1,0 +1,31 @@
+cutevariant.core.reader.fakereader
+==================================
+
+.. automodule:: cutevariant.core.reader.fakereader
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom_class.rst
+   
+      FakeReader
+   
+   
+
+   
+   
+   
+
+
+
