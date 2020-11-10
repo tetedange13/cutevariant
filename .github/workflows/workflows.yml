@@ -30,11 +30,11 @@ jobs:
           python-version: '3.8'    
       - name: install_deps
         run: "make install_deps"
-      - name: install extradeps    
+      - name: install windows deps    
         run: |
-            pip install pywin32 
-            pip install PyInstaller==4.0
-            pip install PySide2
+          pip install pywin32 
+          pip install PyInstaller==4.0
+          pip install PySide2
       - name: make test 
         run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant;cutevariant cutevariant\__main__.py
 
