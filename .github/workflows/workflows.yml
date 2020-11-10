@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.8'
 
-      - name install_deps
+      - name: install_deps
         run: "make install_deps"
-      - name make test 
+      - name: make test 
         run "make test"
