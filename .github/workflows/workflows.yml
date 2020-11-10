@@ -31,7 +31,7 @@ jobs:
       - name: install_deps
         run: "make install_deps"
       - name: install extradeps    
-        run :|
+        run: |
             pip install pywin32 
             pip install PyInstaller==4.0
             pip install PySide2
