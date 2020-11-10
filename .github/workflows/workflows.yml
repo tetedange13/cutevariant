@@ -20,4 +20,23 @@ jobs:
       - name: install PySide2    # Parce que @ysard veut absolument les version deprecated
         run : pip install PySide2 
       - name: make test 
-        run: "python -m pytest tests/core"  # Some problem with gui/ Need to fix it 
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'    
+      - name: install_deps
+        run: "make install_deps"
+      - name: install extradeps    
+        run :|
+          pip install pywin32 
+          pip install PyInstaller==4.0
+          pip install PySide2
+      - name: make test 
+        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant;cutevariant cutevariant\__main__.py
+
+
+
