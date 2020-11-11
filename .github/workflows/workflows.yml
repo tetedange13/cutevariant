@@ -27,6 +27,7 @@ jobs:
 
   windows:
     runs-on: windows-latest
+    if: "contains(github.event.head_commit.message, '[deploy]')"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -41,10 +42,12 @@ jobs:
             pip install pywin32
             pip install PyInstaller==4.0
       - name: create binary 
+        if: "contains(github.event.head_commit.message, '[deploy]')"
       # TODO : use a spec file ! 
         run: pyinstaller -i icon.ico --name="cutevariant" --hidden-import json --add-data "cutevariant;cutevariant" cutevariant\__main__.py
 
       - name: Upload artifact
+        if: "contains(github.event.head_commit.message, '[deploy]')"
         uses: actions/upload-artifact@v2
         with:
           name: cutevariant-standalone
@@ -54,6 +57,7 @@ jobs:
 
   Macos:
     runs-on: macOS-latest
+    if: "contains(github.event.head_commit.message, '[deploy]')"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -67,4 +71,4 @@ jobs:
         run: |
             pip install PyInstaller==4.0
       - name: create binary 
-        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant:cutevariant cutevariant\__main__.py;ls
+        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant:cutevariant cutevariant/__main__.py;ls
