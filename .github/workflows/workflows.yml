@@ -7,18 +7,18 @@ on:
       - github-ci 
 
 
-jobs:
-  linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-      - name: install_deps
-        run: "make install_deps"
-      - name: install PySide2    # Parce que @ysard veut absolument les version deprecated
-        run : pip install PySide2
+# jobs:
+#   linux:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-python@v2
+#         with:
+#           python-version: '3.8'
+#       - name: install_deps
+#         run: "make install_deps"
+#       - name: install PySide2    # Parce que @ysard veut absolument les version deprecated
+#         run : pip install PySide2
   windows:
     runs-on: windows-latest
     steps:
@@ -35,22 +35,22 @@ jobs:
             pip install pywin32
             pip install PyInstaller==4.0
       - name: create binary 
-        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant:. cutevariant\__main__.py
+        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant;. cutevariant\__main__.py
 
-  Macos:
-    runs-on: macOS-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-      - name: install_deps
-        run: "make install"
-      - name: install PySide2    # Parce que @ysard veut absolument les version deprecated
-        run : pip install PySide2
-      - name: install windows deps 
-        run: |
-            pip install pywin32
-            pip install PyInstaller==4.0
-      - name: create binary 
-        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant:cutevariant cutevariant\__main__.py
+  # Macos:
+  #   runs-on: macOS-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-python@v2
+  #       with:
+  #         python-version: '3.8'
+  #     - name: install_deps
+  #       run: "make install"
+  #     - name: install PySide2    # Parce que @ysard veut absolument les version deprecated
+  #       run : pip install PySide2
+  #     - name: install windows deps 
+  #       run: |
+  #           pip install pywin32
+  #           pip install PyInstaller==4.0
+  #     - name: create binary 
+  #       run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant:cutevariant cutevariant\__main__.py
