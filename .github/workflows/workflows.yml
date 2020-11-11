@@ -4,7 +4,21 @@ name: CI
 on: 
   push:
     branches:
-      - github-ci 
+      - devel
+      - master 
+ 
+  pull_request:
+    branches:
+      - devel
+      - master 
+
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Create binary"
+        required: True
+        default: True
+
 
 
 jobs:
@@ -42,7 +56,7 @@ jobs:
             pip install pywin32
             pip install PyInstaller==4.0
       - name: create binary 
-        if: "contains(github.event.head_commit.message, '[deploy]')"
+        if: "${{ github.event.inputs.deploy }}"
       # TODO : use a spec file ! 
         run: pyinstaller -i icon.ico --name="cutevariant" --hidden-import json --add-data "cutevariant;cutevariant" cutevariant\__main__.py
 
@@ -57,7 +71,7 @@ jobs:
 
   Macos:
     runs-on: macOS-latest
-    if: "contains(github.event.head_commit.message, '[deploy]')"
+    if: "${{ github.event.inputs.deploy }}"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
