@@ -44,10 +44,11 @@ jobs:
       # TODO : use a spec file ! 
         run: pyinstaller -i icon.ico --name="cutevariant" --hidden-import json --add-data "cutevariant;cutevariant" cutevariant\__main__.py
 
-    artifacts:
-      paths:
-        - cutevariant
-      expire_in: 1 week
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: cutevariant-standalone
+          path: cutevariant
 
   # MAC OS JOB 
 
