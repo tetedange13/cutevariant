@@ -35,7 +35,7 @@ jobs:
             pip install pywin32
             pip install PyInstaller==4.0
       - name: create binary 
-        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant;. cutevariant\__main__.py
+        run: pyinstaller -i icon.ico --name="cutevariant" --add-data "cutevariant;cutevariant" cutevariant\__main__.py
 
   # Macos:
   #   runs-on: macOS-latest
