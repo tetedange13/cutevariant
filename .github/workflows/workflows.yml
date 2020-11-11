@@ -7,7 +7,7 @@ on:
       - github-ci 
 
 
-# jobs:
+jobs:
 #   linux:
 #     runs-on: ubuntu-latest
 #     steps:
