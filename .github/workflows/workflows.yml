@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: cutevariant-standalone
-          path: cutevariant
+          path: dist
 
   # MAC OS JOB 
 
@@ -63,9 +63,8 @@ jobs:
         run: "make install"
       - name: install PySide2    # Parce que @ysard veut absolument les version deprecated
         run : pip install PySide2
-      - name: install windows deps 
+      - name: install mac deps 
         run: |
-            pip install pywin32
             pip install PyInstaller==4.0
       - name: create binary 
-        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant:cutevariant cutevariant\__main__.py
+        run: pyinstaller -i icon.ico --name="cutevariant" --add-data cutevariant:cutevariant cutevariant\__main__.py;ls
