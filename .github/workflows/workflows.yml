@@ -45,9 +45,9 @@ jobs:
         run: pyinstaller -i icon.ico --name="cutevariant" --hidden-import json --add-data "cutevariant;cutevariant" cutevariant\__main__.py
 
     artifacts:
-    paths:
-      - cutevariant
-    expire_in: 1 week
+      paths:
+        - cutevariant
+      expire_in: 1 week
 
   # MAC OS JOB 
 
