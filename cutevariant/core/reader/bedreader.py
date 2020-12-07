@@ -5,7 +5,7 @@ import os
 import io
 import re
 
-from xphyle import xopen
+from xopen import xopen
 
 # Custom imports
 import cutevariant.commons as cm

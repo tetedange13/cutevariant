@@ -13,7 +13,7 @@ from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
-from xphyle import xopen()
+from xopen import xopen()
 
 # Custom imports
 from cutevariant.gui import style, plugin
